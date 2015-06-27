@@ -10,7 +10,7 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 
 
-public class SearchArtistActivity extends Activity {
+public class ArtistSearchActivity extends Activity {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -40,7 +40,7 @@ public class SearchArtistActivity extends Activity {
         artists.add(new Artist("Tenacious D"));
 
         // Set recycler view adapter.
-        mAdapter = new ArtistAdapter(artists);
+        mAdapter = new ArtistSearchAdapter(artists);
         mRecyclerView.setAdapter(mAdapter);
     }
 

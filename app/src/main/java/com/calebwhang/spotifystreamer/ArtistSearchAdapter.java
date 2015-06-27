@@ -11,7 +11,7 @@ import java.util.ArrayList;
 /**
  * Created by caleb on 6/13/15.
  */
-public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder> {
+public class ArtistSearchAdapter extends RecyclerView.Adapter<ArtistSearchAdapter.ViewHolder> {
 
     private ArrayList<Artist> artists;
 
@@ -26,13 +26,13 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder
     }
 
     // Provide a suitable constructor depending on the dataset.
-    public ArtistAdapter(ArrayList<Artist> artists) {
+    public ArtistSearchAdapter(ArrayList<Artist> artists) {
         this.artists = artists;
     }
 
     // Create new views.
     @Override
-    public ArtistAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ArtistSearchAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // Create a new view.
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.artist_row, parent, false);
