@@ -34,7 +34,6 @@ public class TopTracksActivityFragment extends Fragment {
 
     private String mArtistId;
     private TopTracksAdapter mTopTracksAdapter;
-    private Tracks mTracks;
 
     public TopTracksActivityFragment() {
     }
@@ -78,42 +77,7 @@ public class TopTracksActivityFragment extends Fragment {
      * Fetches Top Tracks list of a given artist from the Spotify API.
      */
     private void getTopTracksList() {
-        SpotifyApi api = new SpotifyApi();
-        SpotifyService spotifyService = api.getService();
-
-        // Get the user's local.
-        Map<String, Object> options = new HashMap<>();
-        options.put(SpotifyService.COUNTRY, Locale.getDefault().getCountry());
-
-        spotifyService.getArtistTopTrack(mArtistId, options, new Callback<Tracks>() {
-            @Override
-            public void success(Tracks tracks, Response response) {
-                mTracks = tracks;
-
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateTracks();
-                    }
-                });
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-
-            }
-        });
-    }
-
-    /**
-     * Updates the list view of the artist tracks.
-     */
-    private void updateTracks() {
-        mTopTracksAdapter.clear();
-
-        for (Iterator<Track> i = mTracks.tracks.iterator(); i.hasNext();) {
-            Track track = i.next();
-            mTopTracksAdapter.add(track);
-        }
+        SpotifyArtistTopTrackTask spotifyArtistTopTrackTask = new SpotifyArtistTopTrackTask(getActivity(), mTopTracksAdapter);
+        spotifyArtistTopTrackTask.execute(mArtistId);
     }
 }
