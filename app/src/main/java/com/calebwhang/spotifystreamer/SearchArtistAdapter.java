@@ -1,8 +1,6 @@
 package com.calebwhang.spotifystreamer;
 
 import android.content.Context;
-import android.media.Image;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +15,9 @@ import java.util.List;
 import kaaes.spotify.webapi.android.models.Artist;
 
 /**
+ * {@link SearchArtistAdapter} exposes a list of artist search results
+ * to a {@link android.widget.ListView}.
+ *
  * Created by caleb on 7/11/15.
  */
 public class SearchArtistAdapter extends ArrayAdapter<Artist> {

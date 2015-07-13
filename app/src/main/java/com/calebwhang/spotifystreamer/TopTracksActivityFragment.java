@@ -3,11 +3,14 @@ package com.calebwhang.spotifystreamer;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +48,10 @@ public class TopTracksActivityFragment extends Fragment {
         Intent intent = getActivity().getIntent();
         if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
             mArtistId = intent.getStringExtra(Intent.EXTRA_TEXT);
+            String artistName = intent.getStringExtra(Intent.EXTRA_TITLE);
+
+            ActionBar actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
+            actionBar.setSubtitle(artistName);
         }
 
         // Initialize the layout.
@@ -57,7 +64,7 @@ public class TopTracksActivityFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                Toast.makeText(getActivity(), "To be implemented in Stage 2", Toast.LENGTH_LONG).show();
             }
         });
 

@@ -79,7 +79,8 @@ public class SearchArtistFragment extends Fragment {
 
                 if (artist != null) {
                     Intent intent = new Intent(getActivity(), TopTracksActivity.class)
-                            .putExtra(Intent.EXTRA_TEXT, artist.id);
+                            .putExtra(Intent.EXTRA_TEXT, artist.id)
+                            .putExtra(Intent.EXTRA_TITLE, artist.name);
 
                     startActivity(intent);
                 }
