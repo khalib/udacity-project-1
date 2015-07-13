@@ -88,8 +88,6 @@ public class SearchArtistFragment extends Fragment {
      * Fetches artist search results from the Spotify API.
      */
     private void getArtistSearchResults() {
-        Log.v(LOG_TAG, "====== called getArtistSearchResults()");
-
         SpotifyArtistSearchTask spotifyArtistSearchTask = new SpotifyArtistSearchTask(getActivity(), mSearchArtistAdapter);
         spotifyArtistSearchTask.execute(mSearchText);
     }
