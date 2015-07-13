@@ -51,11 +51,13 @@ public class TopTracksAdapter extends ArrayAdapter<Track> {
 
         // Account for images not existing for the artist.
         if (track.album.images.size() > 0) {
+            // Display album image.
             Picasso.with(getContext())
                     .load(track.album.images.get(TRACK_IMAGE_MEDIUM).url)
                     .error(getContext().getResources().getDrawable(R.mipmap.ic_launcher))
                     .into(image);
         } else {
+            // Display default image.
             image.setImageResource(R.mipmap.ic_launcher);
         }
 

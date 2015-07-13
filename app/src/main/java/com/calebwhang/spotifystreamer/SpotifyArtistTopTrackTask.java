@@ -33,6 +33,7 @@ public class SpotifyArtistTopTrackTask extends AsyncTask<String, Void, Tracks> {
     protected Tracks doInBackground(String... params) {
         String artistId = params[0];
 
+        // Make API call to Spotify.
         SpotifyApi api = new SpotifyApi();
         SpotifyService spotifyService = api.getService();
 
@@ -58,6 +59,7 @@ public class SpotifyArtistTopTrackTask extends AsyncTask<String, Void, Tracks> {
                     mTopTracksAdapter.add(track);
                 }
             } else {
+                // Display error message for empty results.
                 Toast.makeText(mContext, R.string.toast_error_no_artist_top_songs, Toast.LENGTH_SHORT).show();
             }
         }

@@ -52,6 +52,7 @@ public class SearchArtistAdapter extends ArrayAdapter<Artist> {
 
         // Account for images not existing for the artist.
         if (artist.images.size() > 0) {
+            // Display artist image.
             Picasso.with(getContext())
                     .load(artist.images.get(ARTIST_IMAGE_MEDIUM).url)
                     .resize(ARTIST_IMAGE_WIDTH, ARTIST_IMAGE_HEIGHT)
@@ -59,6 +60,7 @@ public class SearchArtistAdapter extends ArrayAdapter<Artist> {
                     .error(getContext().getResources().getDrawable(R.mipmap.ic_launcher))
                     .into(image);
         } else {
+            // Display default image.
             image.setImageResource(R.mipmap.ic_launcher);
         }
 
