@@ -6,4 +6,9 @@
     <string name="title_activity_artist_search">Spotify Streamer</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_top_tracks">Top 10 Tracks</string>
+
+    <!-- Toast messages -->
+    <string name="toast_error_no_artist_found">Sorry, no artist found.  Please refine your search.</string>
+    <string name="toast_error_no_artist_top_songs">This artist has no top songs - how sad :(</string>
+    <string name="toast_message_implemented_stage_2">To be implemented in Stage 2</string>
 </resources>

@@ -2,6 +2,8 @@ package com.calebwhang.spotifystreamer;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.util.Iterator;
 
@@ -29,10 +31,14 @@ public class SpotifyArtistSearchTask extends AsyncTask<String, Void, ArtistsPage
     protected ArtistsPager doInBackground(String... params) {
         String searchText = params[0];
 
-        SpotifyApi api = new SpotifyApi();
-        SpotifyService spotifyService = api.getService();
+        if (searchText.length() > 0) {
+            SpotifyApi api = new SpotifyApi();
+            SpotifyService spotifyService = api.getService();
 
-        return spotifyService.searchArtists(searchText);
+            return spotifyService.searchArtists(searchText);
+        }
+
+        return null;
     }
 
     @Override
@@ -40,11 +46,17 @@ public class SpotifyArtistSearchTask extends AsyncTask<String, Void, ArtistsPage
         super.onPostExecute(artistsPager);
 
         if (artistsPager != null) {
-            for (Iterator<Artist> i = artistsPager.artists.items.iterator(); i.hasNext();) {
-                Artist artist = i.next();
+            if (artistsPager.artists.items.size() > 0) {
+                mSearchArtistAdapter.clear();
 
-                // Update the artist search results.
-                mSearchArtistAdapter.add(artist);
+                for (Iterator<Artist> i = artistsPager.artists.items.iterator(); i.hasNext();) {
+                    Artist artist = i.next();
+
+                    // Update the artist search results.
+                    mSearchArtistAdapter.add(artist);
+                }
+            } else {
+                Toast.makeText(mContext, R.string.toast_error_no_artist_found, Toast.LENGTH_SHORT).show();
             }
         }
     }

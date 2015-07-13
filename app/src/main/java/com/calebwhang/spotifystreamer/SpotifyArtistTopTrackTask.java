@@ -2,6 +2,7 @@ package com.calebwhang.spotifystreamer;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -47,11 +48,17 @@ public class SpotifyArtistTopTrackTask extends AsyncTask<String, Void, Tracks> {
         super.onPostExecute(tracks);
 
         if (tracks != null) {
-            for (Iterator<Track> i = tracks.tracks.iterator(); i.hasNext();) {
-                Track track = i.next();
+            if (tracks.tracks.size() > 0) {
+                mTopTracksAdapter.clear();
 
-                // Update the artist search results.
-                mTopTracksAdapter.add(track);
+                for (Iterator<Track> i = tracks.tracks.iterator(); i.hasNext();) {
+                    Track track = i.next();
+
+                    // Update the artist search results.
+                    mTopTracksAdapter.add(track);
+                }
+            } else {
+                Toast.makeText(mContext, R.string.toast_error_no_artist_top_songs, Toast.LENGTH_SHORT).show();
             }
         }
     }

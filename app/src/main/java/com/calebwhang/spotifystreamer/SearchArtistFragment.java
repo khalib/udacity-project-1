@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,6 +88,8 @@ public class SearchArtistFragment extends Fragment {
      * Fetches artist search results from the Spotify API.
      */
     private void getArtistSearchResults() {
+        Log.v(LOG_TAG, "====== called getArtistSearchResults()");
+
         SpotifyArtistSearchTask spotifyArtistSearchTask = new SpotifyArtistSearchTask(getActivity(), mSearchArtistAdapter);
         spotifyArtistSearchTask.execute(mSearchText);
     }

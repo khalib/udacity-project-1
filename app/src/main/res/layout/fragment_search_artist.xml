@@ -14,7 +14,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/search_text"
         android:gravity="top"
-        android:hint="Search for an artist "/>
+        android:hint="Search for an artist "
+        android:inputType="text" />
 
     <ListView
         android:id="@+id/list_view_search"
