@@ -12,8 +12,7 @@
 
         <activity
             android:name=".SearchArtistActivity"
-            android:label="@string/title_activity_artist_search"
-            android:launchMode="singleTop">
+            android:label="@string/title_activity_artist_search">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
