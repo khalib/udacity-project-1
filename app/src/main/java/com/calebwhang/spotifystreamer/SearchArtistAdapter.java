@@ -10,9 +10,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
-
-import kaaes.spotify.webapi.android.models.Artist;
+import java.util.ArrayList;
 
 /**
  * {@link SearchArtistAdapter} exposes a list of artist search results
@@ -20,24 +18,21 @@ import kaaes.spotify.webapi.android.models.Artist;
  *
  * Created by caleb on 7/11/15.
  */
-public class SearchArtistAdapter extends ArrayAdapter<Artist> {
+public class SearchArtistAdapter extends ArrayAdapter<ArtistParcelable> {
 
     private final String LOG_TAG = SearchArtistAdapter.class.getSimpleName();
 
-    private final Integer ARTIST_IMAGE_LARGE = 0;
-    private final Integer ARTIST_IMAGE_MEDIUM = 1;
-    private final Integer ARTIST_IMAGE_SMALL = 2;
     private final Integer ARTIST_IMAGE_WIDTH = 100;
     private final Integer ARTIST_IMAGE_HEIGHT = 100;
 
-    public SearchArtistAdapter(Context context, int resource, List<Artist> objects) {
+    public SearchArtistAdapter(Context context, int resource, ArrayList<ArtistParcelable> objects) {
         super(context, resource, objects);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
-        Artist artist = getItem(position);
+        ArtistParcelable artist = getItem(position);
 
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
@@ -51,10 +46,10 @@ public class SearchArtistAdapter extends ArrayAdapter<Artist> {
         ImageView image = (ImageView) convertView.findViewById(R.id.list_item_artist_image);
 
         // Account for images not existing for the artist.
-        if (artist.images.size() > 0) {
+        if (artist.image != null) {
             // Display artist image.
             Picasso.with(getContext())
-                    .load(artist.images.get(ARTIST_IMAGE_MEDIUM).url)
+                    .load(artist.image)
                     .resize(ARTIST_IMAGE_WIDTH, ARTIST_IMAGE_HEIGHT)
                     .centerCrop()
                     .error(getContext().getResources().getDrawable(R.mipmap.ic_launcher))

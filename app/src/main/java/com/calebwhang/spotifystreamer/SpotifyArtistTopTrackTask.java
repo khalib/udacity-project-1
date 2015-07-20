@@ -21,6 +21,11 @@ import retrofit.RetrofitError;
 public class SpotifyArtistTopTrackTask extends AsyncTask<String, Void, Tracks> {
 
     private final String LOG_TAG = SpotifyArtistSearchTask.class.getSimpleName();
+
+    private final Integer TRACK_IMAGE_LARGE = 0;
+    private final Integer TRACK_IMAGE_MEDIUM = 1;
+    private final Integer TRACK_IMAGE_SMALL = 2;
+
     private final Context mContext;
     private final TopTracksAdapter mTopTracksAdapter;
 
@@ -66,8 +71,17 @@ public class SpotifyArtistTopTrackTask extends AsyncTask<String, Void, Tracks> {
                 for (Iterator<Track> i = tracks.tracks.iterator(); i.hasNext();) {
                     Track track = i.next();
 
+                    // Assign image to the track.
+                    String trackImage = null;
+                    if (track.album.images.size() > 0) {
+                        trackImage = track.album.images.get(TRACK_IMAGE_MEDIUM).url;
+                    }
+
+                    // Load the data into the parcelable object.
+                    TrackParcelable trackParcelable = new TrackParcelable(track.name, track.album.name, trackImage);
+
                     // Update the artist search results.
-                    mTopTracksAdapter.add(track);
+                    mTopTracksAdapter.add(trackParcelable);
                 }
             } else {
                 // Display error message for empty results.

@@ -2,11 +2,14 @@ package com.calebwhang.spotifystreamer;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
 public class SearchArtistActivity extends ActionBarActivity {
+
+    private final String LOG_TAG = SearchArtistActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

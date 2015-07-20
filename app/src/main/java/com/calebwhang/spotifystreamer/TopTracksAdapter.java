@@ -1,6 +1,7 @@
 package com.calebwhang.spotifystreamer;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,9 +11,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
-
-import kaaes.spotify.webapi.android.models.Track;
+import java.util.ArrayList;
 
 /**
  * {@link TopTracksAdapter} exposes a list of artist top tracks
@@ -20,20 +19,18 @@ import kaaes.spotify.webapi.android.models.Track;
  *
  * Created by caleb on 7/13/15.
  */
-public class TopTracksAdapter extends ArrayAdapter<Track> {
+public class TopTracksAdapter extends ArrayAdapter<TrackParcelable> {
 
-    private final Integer TRACK_IMAGE_LARGE = 0;
-    private final Integer TRACK_IMAGE_MEDIUM = 1;
-    private final Integer TRACK_IMAGE_SMALL = 2;
+    private final String LOG_TAG = TopTracksAdapter.class.getSimpleName();
 
-    public TopTracksAdapter(Context context, int resource, List<Track> objects) {
+    public TopTracksAdapter(Context context, int resource, ArrayList<TrackParcelable> objects) {
         super(context, resource, objects);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
-        Track track = getItem(position);
+        TrackParcelable track = getItem(position);
 
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
@@ -45,15 +42,15 @@ public class TopTracksAdapter extends ArrayAdapter<Track> {
         title.setText(track.name);
 
         TextView albumName = (TextView) convertView.findViewById(R.id.list_item_track_album_name_textview);
-        albumName.setText(track.album.name);
+        albumName.setText(track.album);
 
         ImageView image = (ImageView) convertView.findViewById(R.id.list_item_track_image);
 
         // Account for images not existing for the artist.
-        if (track.album.images.size() > 0) {
+        if (track.image != null) {
             // Display album image.
             Picasso.with(getContext())
-                    .load(track.album.images.get(TRACK_IMAGE_MEDIUM).url)
+                    .load(track.image)
                     .error(getContext().getResources().getDrawable(R.mipmap.ic_launcher))
                     .into(image);
         } else {
