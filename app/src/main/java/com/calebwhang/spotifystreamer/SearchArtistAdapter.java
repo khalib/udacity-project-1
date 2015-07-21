@@ -25,8 +25,20 @@ public class SearchArtistAdapter extends ArrayAdapter<ArtistParcelable> {
     private final Integer ARTIST_IMAGE_WIDTH = 100;
     private final Integer ARTIST_IMAGE_HEIGHT = 100;
 
+    private ViewHolder mViewHolder;
+
     public SearchArtistAdapter(Context context, int resource, ArrayList<ArtistParcelable> objects) {
         super(context, resource, objects);
+    }
+
+    public static class ViewHolder {
+        public final TextView artistName;
+        public final ImageView artistImage;
+
+        public ViewHolder(View view) {
+            artistName = (TextView) view.findViewById(R.id.list_item_artist_textview);
+            artistImage = (ImageView) view.findViewById(R.id.list_item_artist_image);
+        }
     }
 
     @Override
@@ -37,13 +49,11 @@ public class SearchArtistAdapter extends ArrayAdapter<ArtistParcelable> {
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_artist, parent, false);
+            mViewHolder = new ViewHolder(convertView);
         }
 
         // Load the view elements.
-        TextView name = (TextView) convertView.findViewById(R.id.list_item_artist_textview);
-        name.setText(artist.name);
-
-        ImageView image = (ImageView) convertView.findViewById(R.id.list_item_artist_image);
+        mViewHolder.artistName.setText(artist.name);
 
         // Account for images not existing for the artist.
         if (artist.image != null) {
@@ -53,10 +63,10 @@ public class SearchArtistAdapter extends ArrayAdapter<ArtistParcelable> {
                     .resize(ARTIST_IMAGE_WIDTH, ARTIST_IMAGE_HEIGHT)
                     .centerCrop()
                     .error(getContext().getResources().getDrawable(R.mipmap.ic_launcher))
-                    .into(image);
+                    .into(mViewHolder.artistImage);
         } else {
             // Display default image.
-            image.setImageResource(R.mipmap.ic_launcher);
+            mViewHolder.artistImage.setImageResource(R.mipmap.ic_launcher);
         }
 
         return convertView;
