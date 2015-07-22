@@ -49,10 +49,10 @@ public class SearchArtistAdapter extends ArrayAdapter<ArtistParcelable> {
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_artist, parent, false);
-            mViewHolder = new ViewHolder(convertView);
         }
 
         // Load the view elements.
+        mViewHolder = new ViewHolder(convertView);
         mViewHolder.artistName.setText(artist.name);
 
         // Account for images not existing for the artist.

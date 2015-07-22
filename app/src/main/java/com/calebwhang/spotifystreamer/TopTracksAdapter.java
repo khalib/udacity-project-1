@@ -49,10 +49,10 @@ public class TopTracksAdapter extends ArrayAdapter<TrackParcelable> {
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_track, parent, false);
-            mViewHolder = new ViewHolder(convertView);
         }
 
         // Load the view elements.
+        mViewHolder = new ViewHolder(convertView);
         mViewHolder.trackTitle.setText(track.name);
         mViewHolder.albumName.setText(track.album);
 
