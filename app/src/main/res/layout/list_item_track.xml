@@ -26,13 +26,15 @@
             android:id="@+id/list_item_track_title_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:text="{{ track_title }}" />
 
         <TextView
             android:id="@+id/list_item_track_album_name_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="italic" />
+            android:textStyle="italic"
+            android:text="{{ album_name }}" />
 
     </LinearLayout>
 
