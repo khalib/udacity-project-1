@@ -1,6 +1,5 @@
 package com.calebwhang.spotifystreamer;
 
-import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
@@ -33,6 +32,17 @@ public class SearchArtistFragment extends Fragment {
     public SearchArtistFragment() {
     }
 
+    /**
+     * A callback interface that all activities containing this fragment must implement.
+     * This mechanism allows activities to be notified of item selections.
+     */
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        public void onItemSelected(ArtistParcelable artistParcelable);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.fragment_search_artist, container, false);
@@ -60,12 +70,7 @@ public class SearchArtistFragment extends Fragment {
                 ArtistParcelable artistParcelable = (ArtistParcelable) parent.getItemAtPosition(position);
 
                 if (artistParcelable != null) {
-                    // Pass the artist ID and name.
-                    Intent intent = new Intent(getActivity(), TopTracksActivity.class)
-                            .putExtra(Intent.EXTRA_TEXT, artistParcelable.id)
-                            .putExtra(Intent.EXTRA_TITLE, artistParcelable.name);
-
-                    startActivity(intent);
+                    ((Callback) getActivity()).onItemSelected(artistParcelable);
                 }
             }
         });

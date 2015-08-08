@@ -22,33 +22,37 @@ import kaaes.spotify.webapi.android.models.Track;
  */
 public class TopTracksActivityFragment extends Fragment {
 
-    private final String ARTIST_ID_KEY = "artist_id";
-    private final String ARTIST_NAME_KEY = "artist_name";
-    private final String ARTIST_TOP_TRACKS_KEY = "artist_top_tracks";
+    private final String LOG_TAG = TopTracksActivity.class.getSimpleName();
 
-    private String mArtistId;
-    private String mArtistName;
+    private ArtistParcelable mArtistParcelable;
     private ArrayList<TrackParcelable> mTopTracksList;
     private TopTracksAdapter mTopTracksAdapter;
+
+    public static final String ARTIST_TOP_TRACKS_KEY = "artist_top_tracks";
+    public static final String ARTIST_PARCELABLE_KEY = "artist_parcelable";
 
     public TopTracksActivityFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Get the arguments passed from the parent activity.
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            mArtistParcelable = arguments.getParcelable(ARTIST_PARCELABLE_KEY);
+        }
+
         View rootView = inflater.inflate(R.layout.fragment_top_tracks, container, false);
 
         if (savedInstanceState != null) {
             // Load activity states.
-            mArtistId = savedInstanceState.getString(ARTIST_ID_KEY);
-            mArtistName = savedInstanceState.getString(ARTIST_NAME_KEY);
+            mArtistParcelable = savedInstanceState.getParcelable(ARTIST_PARCELABLE_KEY);
             mTopTracksList = savedInstanceState.getParcelableArrayList(ARTIST_TOP_TRACKS_KEY);
         } else {
             // The detail Activity called via intent and get the artist ID.
             Intent intent = getActivity().getIntent();
             if (intent != null && intent.hasExtra(Intent.EXTRA_TEXT)) {
-                mArtistId = intent.getStringExtra(Intent.EXTRA_TEXT);
-                mArtistName = intent.getStringExtra(Intent.EXTRA_TITLE);
+                mArtistParcelable = intent.getParcelableExtra(Intent.EXTRA_TEXT);
             }
 
             // Initialize empty list.
@@ -57,7 +61,7 @@ public class TopTracksActivityFragment extends Fragment {
 
         // Set the artist name in the action bar.
         ActionBar actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
-        actionBar.setSubtitle(mArtistName);
+        actionBar.setSubtitle(mArtistParcelable.name);
 
         // Initialize the layout.
         mTopTracksAdapter = new TopTracksAdapter(getActivity(), R.layout.list_item_track, mTopTracksList);
@@ -84,8 +88,7 @@ public class TopTracksActivityFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         // Store activity states.
-        outState.putString(ARTIST_ID_KEY, mArtistId);
-        outState.putString(ARTIST_NAME_KEY, mArtistName);
+        outState.putParcelable(ARTIST_PARCELABLE_KEY, mArtistParcelable);
         outState.putParcelableArrayList(ARTIST_TOP_TRACKS_KEY, mTopTracksList);
 
         super.onSaveInstanceState(outState);
@@ -96,6 +99,6 @@ public class TopTracksActivityFragment extends Fragment {
      */
     private void getTopTracksList() {
         SpotifyArtistTopTrackTask spotifyArtistTopTrackTask = new SpotifyArtistTopTrackTask(getActivity(), mTopTracksAdapter);
-        spotifyArtistTopTrackTask.execute(mArtistId);
+        spotifyArtistTopTrackTask.execute(mArtistParcelable.id);
     }
 }
