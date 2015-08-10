@@ -38,9 +38,9 @@ public class SearchArtistFragment extends Fragment {
      */
     public interface Callback {
         /**
-         * DetailFragmentCallback for when an item has been selected.
+         * SearchArtistFragment Callback for when an artist has been selected.
          */
-        public void onItemSelected(ArtistParcelable artistParcelable);
+        public void onArtistSelected(ArtistParcelable artistParcelable);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class SearchArtistFragment extends Fragment {
                 ArtistParcelable artistParcelable = (ArtistParcelable) parent.getItemAtPosition(position);
 
                 if (artistParcelable != null) {
-                    ((Callback) getActivity()).onItemSelected(artistParcelable);
+                    ((Callback) getActivity()).onArtistSelected(artistParcelable);
                 }
             }
         });

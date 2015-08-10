@@ -10,17 +10,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
-
-import kaaes.spotify.webapi.android.models.Track;
 
 
 /**
  * Encapsulates fetching an artists top tracks and displaying it as a {@link ListView} layout.
  */
-public class TopTracksActivityFragment extends Fragment {
+public class TopTracksFragment extends Fragment {
 
     private final String LOG_TAG = TopTracksActivity.class.getSimpleName();
 
@@ -31,7 +28,18 @@ public class TopTracksActivityFragment extends Fragment {
     public static final String ARTIST_TOP_TRACKS_KEY = "artist_top_tracks";
     public static final String ARTIST_PARCELABLE_KEY = "artist_parcelable";
 
-    public TopTracksActivityFragment() {
+    public TopTracksFragment() {
+    }
+
+    /**
+     * A callback interface that all activities containing this fragment must implement.
+     * This mechanism allows activities to be notified of item selections.
+     */
+    public interface Callback {
+        /**
+         * TopTracksActivity Fragement Callback for when a track has been selected.
+         */
+        public void onTrackSelected(TrackParcelable trackParcelable);
     }
 
     @Override
@@ -73,7 +81,11 @@ public class TopTracksActivityFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getActivity(), R.string.toast_message_implemented_stage_2, Toast.LENGTH_LONG).show();
+                TrackParcelable trackParcelable = (TrackParcelable) parent.getItemAtPosition(position);
+
+                if (trackParcelable != null) {
+                    ((Callback) getActivity()).onTrackSelected(trackParcelable);
+                }
             }
         });
 

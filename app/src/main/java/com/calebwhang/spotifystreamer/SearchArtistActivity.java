@@ -3,12 +3,11 @@ package com.calebwhang.spotifystreamer;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class SearchArtistActivity extends ActionBarActivity implements SearchArtistFragment.Callback {
+public class SearchArtistActivity extends ActionBarActivity implements SearchArtistFragment.Callback, TopTracksFragment.Callback {
 
     private final String LOG_TAG = SearchArtistActivity.class.getSimpleName();
     private static final String TOP_TRACKS_ACTIVITY_FRAGMENT_TAG = "top_tracks_activity_fragment";
@@ -58,17 +57,17 @@ public class SearchArtistActivity extends ActionBarActivity implements SearchArt
 
 
     @Override
-    public void onItemSelected(ArtistParcelable artistParcelable) {
+    public void onArtistSelected(ArtistParcelable artistParcelable) {
         if (mTwoPane) {
             // Show the detail view in this activity by adding or replacing the detail fragment.
             Bundle args = new Bundle();
-            args.putParcelable(TopTracksActivityFragment.ARTIST_PARCELABLE_KEY, artistParcelable);
+            args.putParcelable(TopTracksFragment.ARTIST_PARCELABLE_KEY, artistParcelable);
 
-            TopTracksActivityFragment topTracksActivityFragment = new TopTracksActivityFragment();
-            topTracksActivityFragment.setArguments(args);
+            TopTracksFragment topTracksFragment = new TopTracksFragment();
+            topTracksFragment.setArguments(args);
 
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.top_tracks_detail_container, topTracksActivityFragment, TOP_TRACKS_ACTIVITY_FRAGMENT_TAG)
+                    .replace(R.id.top_tracks_detail_container, topTracksFragment, TOP_TRACKS_ACTIVITY_FRAGMENT_TAG)
                     .commit();
         } else {
             // Pass the artist ID and name.
@@ -76,6 +75,13 @@ public class SearchArtistActivity extends ActionBarActivity implements SearchArt
                     .putExtra(Intent.EXTRA_TEXT, artistParcelable);
 
             startActivity(intent);
+        }
+    }
+
+    @Override
+    public void onTrackSelected(TrackParcelable trackParcelable) {
+        if (mTwoPane) {
+            // Display track player modal.
         }
     }
 }

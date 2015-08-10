@@ -4,11 +4,14 @@ import android.content.Intent;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class TopTracksActivity extends ActionBarActivity {
+public class TopTracksActivity extends ActionBarActivity implements TopTracksFragment.Callback {
+
+    private final String LOG_TAG = TopTracksActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,4 +42,14 @@ public class TopTracksActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onTrackSelected(TrackParcelable trackParcelable) {
+        // Go to the Track Player activity.
+        Intent intent = new Intent(this, TrackPlayerActivity.class)
+                .putExtra(Intent.EXTRA_TEXT, trackParcelable);
+
+        startActivity(intent);
+    }
+
 }
