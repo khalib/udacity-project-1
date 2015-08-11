@@ -25,7 +25,7 @@ import java.util.Date;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class TrackPlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
+public class TrackPlayerFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, MediaPlayer.OnCompletionListener {
 
     private final String LOG_TAG = TrackPlayerActivity.class.getSimpleName();
 
@@ -86,6 +86,10 @@ public class TrackPlayerFragment extends Fragment implements SeekBar.OnSeekBarCh
         // Initialize the media player.
         mMediaPlayer = new MediaPlayer();
 
+        // Set listeners.
+        mMediaSeekBar.setOnSeekBarChangeListener(this);
+        mMediaPlayer.setOnCompletionListener(this);
+
         // Set button tap handlers.
         mPreviousTrackButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,6 +113,7 @@ public class TrackPlayerFragment extends Fragment implements SeekBar.OnSeekBarCh
                 Log.v(LOG_TAG, "PLAY TAPPED");
                 mMediaPlayer.start();
                 mIsMediaPlaying = true;
+                showPlayButton(false);
             }
         });
 
@@ -118,6 +123,7 @@ public class TrackPlayerFragment extends Fragment implements SeekBar.OnSeekBarCh
                 Log.v(LOG_TAG, "PAUSE TAPPED");
                 mMediaPlayer.pause();
                 mIsMediaPlaying = false;
+                showPlayButton(true);
             }
         });
 
@@ -154,6 +160,7 @@ public class TrackPlayerFragment extends Fragment implements SeekBar.OnSeekBarCh
             mMediaPlayer.start();
             mIsMediaPlaying = true;
             mUpdateSeekBarTask.run();
+            showPlayButton(false);
         }
     }
 
@@ -167,17 +174,29 @@ public class TrackPlayerFragment extends Fragment implements SeekBar.OnSeekBarCh
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        Log.v(LOG_TAG, "======================= onProgressChanged");
+        if (fromUser) {
+            // Update the current time display as the user slides the seek bar around.
+            updateSeekBar(false);
+        }
     }
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-        Log.v(LOG_TAG, "======================= onStartTrackingTouch");
+        // Stop the seek bar updates while the user slides the seek bar around.
+        mHandler.removeCallbacks(mUpdateSeekBarTask);
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        Log.v(LOG_TAG, "======================= onStopTrackingTouch");
+        // Play the track from where the user slid the seek bar from.
+        updateSeekBar(true);
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        showPlayButton(false);
+
+        // Play the next track.
     }
 
     /**
@@ -192,17 +211,17 @@ public class TrackPlayerFragment extends Fragment implements SeekBar.OnSeekBarCh
     }
 
     /**
-     * Function to get Progress percentage
+     * Gets the Progress percentage
      * @param currentDuration
      * @param totalDuration
      * */
     public int getProgressPercentage(long currentDuration, long totalDuration){
-        Double percentage = (double) 0;
+        Double percentage;
         long currentSeconds = (int) (currentDuration / 1000);
         long totalSeconds = (int) (totalDuration / 1000);
 
         // Calculating percentage
-        percentage =(((double)currentSeconds)/totalSeconds)*100;
+        percentage =(((double)currentSeconds) / totalSeconds) * 100;
 
         return percentage.intValue();
     }
@@ -220,8 +239,53 @@ public class TrackPlayerFragment extends Fragment implements SeekBar.OnSeekBarCh
             mMediaSeekBar.setProgress(progress);
             mCurrentTimeView.setText(getReadableTimeDuration(currentPosition));
 
-            mHandler.postDelayed(this, SEEK_BAR_TASK_UPDATE);
+            runSeekBarUpdateTask();
         }
     };
+
+    /**
+     * Starts the progress updater on the seek bar.
+     */
+    private void runSeekBarUpdateTask() {
+        mHandler.postDelayed(mUpdateSeekBarTask, SEEK_BAR_TASK_UPDATE);
+    }
+
+    /**
+     * Handles updates to the progress displays when the seek bar is moved.
+     * @param seekToPosition whether the track should be updated to where the seek bar is.
+     */
+    private void updateSeekBar(boolean seekToPosition) {
+        // Stop the track progress display updates.
+        mHandler.removeCallbacks(mUpdateSeekBarTask);
+
+        // Calculate positions.
+        int currentPosition = mMediaSeekBar.getProgress();
+        int progress = (int) (currentPosition * mTrackParcelable.previewDuration / 100);
+
+        if (seekToPosition) {
+            // Play the track from where the seek bar is positioned.
+            mMediaPlayer.seekTo(progress);
+        }
+
+        // Display the track time from where the seek bar is positioned.
+        mCurrentTimeView.setText(getReadableTimeDuration(progress));
+
+        // Run the track progress display updates.
+        runSeekBarUpdateTask();
+    }
+
+    /**
+     * Display the play button in the UI.  If false, the pause button is displayed.
+     * @param show whether or not the play button should be visible.
+     */
+    private void showPlayButton(boolean show) {
+        if (show) {
+            mPlayTrackButton.setVisibility(View.VISIBLE);
+            mPauseTrackButton.setVisibility(View.GONE);
+        } else {
+            mPlayTrackButton.setVisibility(View.GONE);
+            mPauseTrackButton.setVisibility(View.VISIBLE);
+        }
+    }
 
 }
