@@ -1,9 +1,13 @@
 package com.calebwhang.spotifystreamer;
 
+import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -23,13 +27,18 @@ public class SpotifyArtistTopTrackTask extends AsyncTask<String, Void, Tracks> {
     private final String LOG_TAG = SpotifyArtistSearchTask.class.getSimpleName();
 
     private final Context mContext;
-    private final TopTracksAdapter mTopTracksAdapter;
-
     private Exception exception;
+    private OnCompletionListener mCompletionListener;
 
-    public SpotifyArtistTopTrackTask(Context mContext, TopTracksAdapter mTopTracksAdapter) {
-        this.mContext = mContext;
-        this.mTopTracksAdapter = mTopTracksAdapter;
+    public SpotifyArtistTopTrackTask(Context context) {
+        this.mContext = context;
+    }
+
+    /**
+     *
+     */
+    public interface OnCompletionListener {
+        void onCompletion(Tracks tracks);
     }
 
     @Override
@@ -61,22 +70,22 @@ public class SpotifyArtistTopTrackTask extends AsyncTask<String, Void, Tracks> {
         if (exception != null) {
             Toast.makeText(mContext, R.string.toast_error_no_internet, Toast.LENGTH_LONG).show();
         } else if (tracks != null) {
-            if (tracks.tracks.size() > 0) {
-                mTopTracksAdapter.clear();
+            mCompletionListener.onCompletion(tracks);
 
-                for (Iterator<Track> i = tracks.tracks.iterator(); i.hasNext();) {
-                    Track track = i.next();
-
-                    // Load the data into the parcelable object.
-                    TrackParcelable trackParcelable = new TrackParcelable(track);
-
-                    // Update the artist search results.
-                    mTopTracksAdapter.add(trackParcelable);
-                }
-            } else {
+            if (tracks.tracks.size() == 0) {
                 // Display error message for empty results.
                 Toast.makeText(mContext, R.string.toast_error_no_artist_top_songs, Toast.LENGTH_SHORT).show();
             }
         }
     }
+
+    /**
+     * Register a callback to be invoked when call to the Spotify API is complete.
+     *
+     * @param completionListener the callback that will be run
+     */
+    public void setOnCompletionListener(OnCompletionListener completionListener) {
+        mCompletionListener = completionListener;
+    }
+
 }

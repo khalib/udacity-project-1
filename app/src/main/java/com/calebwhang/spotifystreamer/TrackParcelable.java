@@ -38,6 +38,10 @@ public class TrackParcelable implements Parcelable {
         }
     };
 
+    public TrackParcelable() {
+
+    }
+
     public TrackParcelable(Track track) {
         name = track.name;
         album = track.album.name;

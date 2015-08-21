@@ -1,17 +1,29 @@
 package com.calebwhang.spotifystreamer;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.ArrayList;
 
-public class SearchArtistActivity extends ActionBarActivity implements SearchArtistFragment.Callback, TopTracksFragment.Callback {
+import com.calebwhang.spotifystreamer.service.MediaPlayerService;
+
+
+public class SearchArtistActivity extends ActionBarActivity implements
+        SearchArtistFragment.Callback, TopTracksFragment.Callback {
 
     private final String LOG_TAG = SearchArtistActivity.class.getSimpleName();
     private static final String TOP_TRACKS_ACTIVITY_FRAGMENT_TAG = "top_tracks_activity_fragment";
 
+    private MediaPlayerService mMediaPlayerService;
+    private boolean mIsMediaServiceBound;
     private boolean mTwoPane;
 
     @Override
@@ -31,6 +43,10 @@ public class SearchArtistActivity extends ActionBarActivity implements SearchArt
         } else {
             mTwoPane = false;
         }
+
+        // Bind to MediaPlayerService¬
+        Intent intent = new Intent(this, MediaPlayerService.class);
+        bindService(intent, mMediaPlayerConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -79,9 +95,28 @@ public class SearchArtistActivity extends ActionBarActivity implements SearchArt
     }
 
     @Override
-    public void onTrackSelected(TrackParcelable trackParcelable) {
-        if (mTwoPane) {
-            // Display track player modal.
-        }
+    public void onTrackSelected(ArrayList<TrackParcelable> tracks, int position) {
+        Log.v(LOG_TAG, "===== onTrackSelected()");
+
+        // Play and display the track info and player controls.
+        mMediaPlayerService.playAndDisplayTrack(tracks, position, getSupportFragmentManager(), mTwoPane);
     }
+
+    /**
+     * Manage MediaPlayerService connection.
+     */
+    private ServiceConnection mMediaPlayerConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MediaPlayerService.MediaPlayerServiceBinder binder = (MediaPlayerService.MediaPlayerServiceBinder) service;
+            mMediaPlayerService = binder.getService();
+            mIsMediaServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mIsMediaServiceBound = false;
+        }
+    };
+
 }

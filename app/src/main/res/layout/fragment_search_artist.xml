@@ -1,15 +1,30 @@
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".SearchActivity$SearchArtistFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SearchActivity$SearchArtistFragment">
+    android:orientation="vertical">
 
     <android.support.v7.widget.SearchView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/search_text"
         android:gravity="top" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Play Song"
+        android:onClick="playSong"
+        android:visibility="gone" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pause Song"
+        android:onClick="pauseSong"
+        android:visibility="gone" />
 
     <ListView
         android:id="@+id/list_view_search"
@@ -19,4 +34,4 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/search_text" />
 
-</RelativeLayout>
+</LinearLayout>

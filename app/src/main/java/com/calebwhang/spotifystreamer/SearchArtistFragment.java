@@ -1,6 +1,8 @@
 package com.calebwhang.spotifystreamer;
 
-import android.support.v4.app.Fragment;
+import android.annotation.TargetApi;
+import android.app.Fragment;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 /**
  * Encapsulates fetching artist search rersults and displaying it as a {@link ListView} layout.
  */
+@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class SearchArtistFragment extends Fragment {
 
     private final String LOG_TAG = SearchArtistFragment.class.getSimpleName();
@@ -29,8 +32,7 @@ public class SearchArtistFragment extends Fragment {
     private SearchArtistAdapter mSearchArtistAdapter;
     private ArrayList<ArtistParcelable> mArtistSearchResults;
 
-    public SearchArtistFragment() {
-    }
+    public SearchArtistFragment() {}
 
     /**
      * A callback interface that all activities containing this fragment must implement.
@@ -98,6 +100,8 @@ public class SearchArtistFragment extends Fragment {
             }
         });
 
+
+
         return mRootView;
     }
 
@@ -118,4 +122,15 @@ public class SearchArtistFragment extends Fragment {
         spotifyArtistSearchTask.execute(mSearchText);
     }
 
+    /**
+     * FOR TESTING FOR TESTING FOR TESTING FOR TESTING FOR TESTING FOR TESTING FOR TESTING
+     * @param savedInstanceState
+     */
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        mSearchText = "d";
+        getArtistSearchResults();
+    }
 }

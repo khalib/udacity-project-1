@@ -1,0 +1,439 @@
+package com.calebwhang.spotifystreamer;
+
+import android.annotation.TargetApi;
+import android.app.Fragment;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.media.MediaPlayer;
+import android.os.Build;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.TextView;
+
+import com.calebwhang.spotifystreamer.service.MediaPlayerService;
+import com.calebwhang.spotifystreamer.service.MediaPlayerService.MediaPlayerServiceBinder;
+import com.squareup.picasso.Picasso;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+
+/**
+ * A placeholder fragment containing a simple view.
+ */
+@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSeekBarChangeListener,
+        MediaPlayer.OnCompletionListener {
+
+    private final String LOG_TAG = MediaPlayerFragment.class.getSimpleName();
+
+    private final Integer ALBUM_COVER_IMAGE_WIDTH = 1200;
+    private final Integer ALBUM_COVER_IMAGE_HEIGHT = 1200;
+    private final Integer SEEK_BAR_TASK_UPDATE = 1000;  // in milliseconds
+    private final Float BUTTON_DISABLED_OPACITY = (float) 0.35;
+    private final Float BUTTON_ENABLED_OPACITY = (float) 1.0;
+    private final String IS_MEDIA_PLAYING_KEY = "is_media_playing";
+
+    // View elements.
+    private TextView mArtistView;
+    private TextView mAlbumView;
+    private TextView mTrackView;
+    private ImageView mAlbumCoverView;
+    private ImageButton mNextTrackButton;
+    private ImageButton mPreviousTrackButton;
+    private ImageButton mPlayTrackButton;
+    private ImageButton mPausePlaybackButton;
+    private SeekBar mMediaSeekBar;
+    private TextView mCurrentTimeView;
+    private TextView mEndTimeView;
+
+    private MediaPlayerService mMediaPlayerService;
+    private TrackParcelable mCurrentTrack;
+    private boolean mIsMediaServiceBound;
+    private boolean mIsMediaPlaying = false;
+    private boolean mIsMediaPaused = false;
+    private Handler mHandler = new Handler();
+    private ShareActionProvider mShareActionProvider;
+
+    public MediaPlayerFragment() {
+
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        Log.v(LOG_TAG, "===== onCreate()");
+
+        super.onCreate(savedInstanceState);
+
+        // Bind to MediaPlayerService
+        Intent intent = new Intent(getActivity(), MediaPlayerService.class);
+        getActivity().bindService(intent, mMediaPlayerConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        Log.v(LOG_TAG, "===== onCreateView()");
+
+        View rootView = inflater.inflate(R.layout.fragment_media_player, container, false);
+
+        if (savedInstanceState != null) {
+            mIsMediaPlaying = savedInstanceState.getBoolean(IS_MEDIA_PLAYING_KEY);
+        }
+
+        // Load view elements.
+        mArtistView = (TextView) rootView.findViewById(R.id.track_artist_textview);
+        mAlbumView = (TextView) rootView.findViewById(R.id.track_album_textview);
+        mAlbumCoverView = (ImageView) rootView.findViewById(R.id.track_album_cover_imageview);
+        mTrackView = (TextView) rootView.findViewById(R.id.track_track_name_textview);
+        mPreviousTrackButton = (ImageButton) rootView.findViewById(R.id.track_previous_track_button);
+        mNextTrackButton = (ImageButton) rootView.findViewById(R.id.track_next_track_button);
+        mPlayTrackButton = (ImageButton) rootView.findViewById(R.id.track_play_track_button);
+        mPausePlaybackButton = (ImageButton) rootView.findViewById(R.id.track_pause_playback_button);
+        mMediaSeekBar = (SeekBar) rootView.findViewById(R.id.track_media_seekbar);
+        mCurrentTimeView = (TextView) rootView.findViewById(R.id.track_current_time_textview);
+        mEndTimeView = (TextView) rootView.findViewById(R.id.track_end_time_textview);
+
+        // Set listeners.
+        mMediaSeekBar.setOnSeekBarChangeListener(this);
+
+        // Enable the menu.
+        setHasOptionsMenu(true);
+
+        // Set button tap handlers.
+        mPreviousTrackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v(LOG_TAG, "PREVIOUS TAPPED");
+
+                mMediaPlayerService.playPreviousTrack();
+                mIsMediaPlaying = true;
+                loadTrackInfo();
+                renderControlButtons(false);
+            }
+        });
+
+        mNextTrackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v(LOG_TAG, "NEXT TAPPED");
+
+                mMediaPlayerService.playNextTrack();
+                mIsMediaPlaying = true;
+                loadTrackInfo();
+                renderControlButtons(false);
+            }
+        });
+
+        mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v(LOG_TAG, "PLAY TAPPED");
+
+                startPlayback();
+            }
+        });
+
+        mPausePlaybackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v(LOG_TAG, "PAUSE TAPPED");
+
+                pausePlayback();
+            }
+        });
+
+        return rootView;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.menu_top_tracks_fragment, menu);
+
+        // Retrieve the share menu item
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+
+        // Get the provider and hold onto it to set/change the share intent.
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // If onCreateOptionsMenu has already happened, we need to update the share intent now.
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(createShareTrackIntent());
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        Log.v(LOG_TAG, "===== onSaveInstanceState()");
+
+        // Store activity states.
+        outState.putBoolean(IS_MEDIA_PLAYING_KEY, mIsMediaPlaying);
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        if (fromUser) {
+            // Update the current time display as the user slides the seek bar around.
+            updateSeekBar(false);
+        }
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        Log.v(LOG_TAG, "===== onStartTrackingTouch()");
+
+        // Stop the seek bar updates while the user slides the seek bar around.
+        mHandler.removeCallbacks(mUpdateSeekBarTask);
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        Log.v(LOG_TAG, "===== onStopTrackingTouch()");
+
+        // Play the track from where the user slid the seek bar from.
+        updateSeekBar(true);
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        Log.v(LOG_TAG, "===== onCompletion()");
+
+        renderControlButtons(false);
+
+        // Play the next track.
+    }
+
+    /**
+     *
+     * @return
+     */
+    private Intent createShareTrackIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, "This is the track info");
+
+        return shareIntent;
+    }
+
+    /**
+     * Converts a time given in milliseconds to a human readable format.
+     * @param time
+     * @return A human readable time in the format mm:ss
+     */
+    public String getReadableTimeDuration(long time) {
+        Date date = new Date(time);
+        DateFormat formatter = new SimpleDateFormat("mm:ss");
+        return formatter.format(date);
+    }
+
+    /**
+     * Gets the Progress percentage
+     * @param currentDuration
+     * @param totalDuration
+     * */
+    public int getProgressPercentage(long currentDuration, long totalDuration){
+        Double percentage;
+        long currentSeconds = (int) (currentDuration / 1000);
+        long totalSeconds = (int) (totalDuration / 1000);
+
+        // Calculating percentage
+        percentage =(((double)currentSeconds) / totalSeconds) * 100;
+
+        return percentage.intValue();
+    }
+
+    /**
+     * Background runnable thread that updates the seek bar.
+     */
+    private Runnable mUpdateSeekBarTask = new Runnable() {
+        @Override
+        public void run() {
+            if (mMediaPlayerService != null) {
+                int currentPosition = mMediaPlayerService.getCurrentPlaybackPosition();
+                int progress = getProgressPercentage(currentPosition, mCurrentTrack.previewDuration);
+
+                // Update the seek bar and the current time.
+                mMediaSeekBar.setProgress(progress);
+                mCurrentTimeView.setText(getReadableTimeDuration(currentPosition));
+            }
+
+            runSeekBarUpdateTask();
+        }
+    };
+
+    /**
+     * Starts the progress updater on the seek bar.
+     */
+    private void runSeekBarUpdateTask() {
+        mHandler.postDelayed(mUpdateSeekBarTask, SEEK_BAR_TASK_UPDATE);
+    }
+
+    /**
+     * Handles updates to the progress displays when the seek bar is moved.
+     * @param seekToPosition whether the track should be updated to where the seek bar is.
+     */
+    private void updateSeekBar(boolean seekToPosition) {
+        // Stop the track progress display updates.
+        mHandler.removeCallbacks(mUpdateSeekBarTask);
+
+        // Calculate positions.
+        int currentPosition = mMediaSeekBar.getProgress();
+        int position = (int) (currentPosition * mCurrentTrack.previewDuration / 100);
+
+        if (seekToPosition) {
+            // Play the track from where the seek bar is positioned.
+            mMediaPlayerService.setPlaybackPosition(position);
+        }
+
+        // Display the track time from where the seek bar is positioned.
+        mCurrentTimeView.setText(getReadableTimeDuration(position));
+
+        // Run the track progress display updates.
+        runSeekBarUpdateTask();
+    }
+
+    /**
+     * Renders the control buttons and the different states.
+     *
+     * The button states are as follows:
+     *   Play: Displayed when media is stopped or paused.
+     *   Pause: Displayed when media is playing.
+     *   Next: Clickable if a next track is available.
+     *   Previous: Clickable if a previous track is available.
+     *
+     * @param showPlayButton whether or not the play button should be visible.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void renderControlButtons(boolean showPlayButton) {
+        // Play/Pause states.
+        if (showPlayButton) {
+            mPlayTrackButton.setVisibility(View.VISIBLE);
+            mPausePlaybackButton.setVisibility(View.GONE);
+        } else {
+            mPlayTrackButton.setVisibility(View.GONE);
+            mPausePlaybackButton.setVisibility(View.VISIBLE);
+        }
+
+        // Next track states.
+        if (!mMediaPlayerService.hasNextTrack()) {
+            mNextTrackButton.setClickable(false);
+            mNextTrackButton.setAlpha(BUTTON_DISABLED_OPACITY);
+        } else {
+            mNextTrackButton.setClickable(true);
+            mNextTrackButton.setAlpha(BUTTON_ENABLED_OPACITY);
+        }
+
+        // Previous track states.
+        if (!mMediaPlayerService.hasPreviousTrack()) {
+            mPreviousTrackButton.setClickable(false);
+            mPreviousTrackButton.setAlpha(BUTTON_DISABLED_OPACITY);
+        } else {
+            mPreviousTrackButton.setClickable(true);
+            mPreviousTrackButton.setAlpha(BUTTON_ENABLED_OPACITY);
+        }
+    }
+
+    /**
+     * Handles the actions for when the player is played from the interface.
+     */
+    private void startPlayback() {
+        mMediaPlayerService.playTrack();
+        mIsMediaPlaying = true;
+        renderControlButtons(false);
+    }
+
+    /**
+     * Handles the actions for when the player is paused from the interface.
+     */
+    private void pausePlayback() {
+        // Stop the track progress display updates.
+        mHandler.removeCallbacks(mUpdateSeekBarTask);
+
+        mMediaPlayerService.pauseTrack();
+        mIsMediaPlaying = false;
+        mIsMediaPaused = true;
+
+        // Swap out the play/pause buttons.
+        renderControlButtons(true);
+    }
+
+    /**
+     * Loads the track info to be displayed.
+     */
+    private void loadTrackInfo() {
+        if (mMediaPlayerService != null) {
+
+        }
+        mCurrentTrack = mMediaPlayerService.getCurrentTrack();
+
+        mArtistView.setText(mCurrentTrack.artist);
+        mAlbumView.setText(mCurrentTrack.album);
+        mTrackView.setText(mCurrentTrack.name);
+        mCurrentTimeView.setText(getReadableTimeDuration(0));
+        mEndTimeView.setText(getReadableTimeDuration(mCurrentTrack.previewDuration));
+
+        // Display artist image.
+        Picasso.with(getActivity())
+                .load(mCurrentTrack.image)
+                .resize(ALBUM_COVER_IMAGE_WIDTH, ALBUM_COVER_IMAGE_HEIGHT)
+                .error(getActivity().getResources().getDrawable(R.mipmap.ic_launcher))
+                .into(mAlbumCoverView);
+    }
+
+    /**
+     *
+     */
+    private ServiceConnection mMediaPlayerConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.v(LOG_TAG, "===== onServiceConnected()");
+
+            MediaPlayerServiceBinder binder = (MediaPlayerServiceBinder) service;
+            mMediaPlayerService = binder.getService();
+            mCurrentTrack = mMediaPlayerService.getCurrentTrack();
+            mIsMediaServiceBound = true;
+
+            // Load the track information into the view.
+            loadTrackInfo();
+
+            // Prevent the media from simultaneously playing multiple times.
+            if (!mIsMediaPlaying) {
+                mIsMediaPlaying = true;
+                mUpdateSeekBarTask.run();
+                renderControlButtons(false);
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mIsMediaServiceBound = false;
+        }
+    };
+
+}

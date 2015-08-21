@@ -7,21 +7,22 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class TrackPlayerActivity extends ActionBarActivity {
+public class MediaPlayerActivity extends ActionBarActivity {
 
-    private final String LOG_TAG = TrackPlayerActivity.class.getSimpleName();
+    private final String LOG_TAG = MediaPlayerActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_track_player);
-    }
 
+        setContentView(R.layout.activity_media_player);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_track_player, menu);
+
         return true;
     }
 
