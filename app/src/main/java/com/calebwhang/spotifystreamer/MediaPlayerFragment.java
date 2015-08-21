@@ -1,7 +1,6 @@
 package com.calebwhang.spotifystreamer;
 
 import android.annotation.TargetApi;
-import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -38,7 +37,6 @@ import java.util.Date;
 /**
  * A placeholder fragment containing a simple view.
  */
-@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSeekBarChangeListener,
         MediaPlayer.OnCompletionListener {
 
@@ -71,6 +69,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     private boolean mIsMediaPaused = false;
     private Handler mHandler = new Handler();
     private ShareActionProvider mShareActionProvider;
+    private String mShareText;
 
     public MediaPlayerFragment() {
 
@@ -173,13 +172,17 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
         // Get the provider and hold onto it to set/change the share intent.
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+        if (mShareText != null) {
+            mShareActionProvider.setShareIntent(createShareTrackIntent());
+        }
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        // If onCreateOptionsMenu has already happened, we need to update the share intent now.
+        // If onCreateOptionsMenu has already happened, update the share intent.
         if (mShareActionProvider != null) {
             mShareActionProvider.setShareIntent(createShareTrackIntent());
         }
@@ -233,10 +236,11 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
      * @return
      */
     private Intent createShareTrackIntent() {
+        // Create the share intent.
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, "This is the track info");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, mShareText);
 
         return shareIntent;
     }
@@ -421,6 +425,12 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
             // Load the track information into the view.
             loadTrackInfo();
+
+            // Construct the text to be shared.
+            mShareText = String.format(getActivity().getString(R.string.format_track_share_notification),
+                    mCurrentTrack.name,
+                    mCurrentTrack.artist,
+                    mCurrentTrack.externalSpotifyUrl);
 
             // Prevent the media from simultaneously playing multiple times.
             if (!mIsMediaPlaying) {

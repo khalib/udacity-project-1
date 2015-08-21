@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
     <string name="app_name">Spotify Streamer</string>
 
     <string name="action_settings">Settings</string>
@@ -7,6 +7,10 @@
     <string name="title_activity_artist_search">Spotify Streamer</string>
     <string name="title_activity_top_tracks">Top 10 Tracks</string>
     <string name="artist_search_hint">Search for an artist</string>
+
+    <string name="format_track_share_notification">
+        Check out this song \"<xliff:g id="songName">%1$s</xliff:g>\" by <xliff:g id="artist">%2$s</xliff:g>: <xliff:g id="artist">%3$s</xliff:g>
+    </string>
 
     <!-- Toast messages -->
     <string name="toast_error_no_artist_found">Sorry, no artist found.  Please refine your search.</string>

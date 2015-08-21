@@ -17,12 +17,14 @@ public class TrackParcelable implements Parcelable {
     private final Integer TRACK_IMAGE_LARGE = 0;
     private final Integer TRACK_IMAGE_MEDIUM = 1;
     private final Integer TRACK_IMAGE_SMALL = 2;
+    private final String TRACK_EXTERNAL_URL_SPOTIFY = "spotify";
 
     public String name;
     public String album;
     public String image;
     public String artist;
     public String previewUrl;
+    public String externalSpotifyUrl;
     public long duration;
     public long previewDuration;
 
@@ -49,6 +51,7 @@ public class TrackParcelable implements Parcelable {
         duration = track.duration_ms;
         previewUrl = track.preview_url;
         previewDuration = 30000;  // in ms
+        externalSpotifyUrl = track.external_urls.get(TRACK_EXTERNAL_URL_SPOTIFY);
 
         // Assign image to the track.
         String trackImage = null;
@@ -66,6 +69,7 @@ public class TrackParcelable implements Parcelable {
         previewUrl = in.readString();
         duration = in.readLong();
         previewDuration = in.readLong();
+        externalSpotifyUrl = in.readString();
     }
 
     @Override
@@ -82,6 +86,7 @@ public class TrackParcelable implements Parcelable {
         dest.writeString(previewUrl);
         dest.writeLong(duration);
         dest.writeLong(previewDuration);
+        dest.writeString(externalSpotifyUrl);
     }
 
 }
