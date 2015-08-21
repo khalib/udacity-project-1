@@ -1,10 +1,10 @@
 <resources>
     <string name="app_name">Spotify Streamer</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="action_share">Share</string>
+
     <string name="title_activity_artist_search">Spotify Streamer</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_top_tracks">Top 10 Tracks</string>
     <string name="artist_search_hint">Search for an artist</string>
 
@@ -13,5 +13,5 @@
     <string name="toast_error_no_artist_top_songs">This artist has no top songs - how sad :(</string>
     <string name="toast_error_no_internet">No internet connection available. Please try again later.</string>
     <string name="toast_message_implemented_stage_2">To be implemented in Stage 2</string>
-    <string name="title_activity_track_player">TrackPlayerActivity</string>
+    <string name="toast_error_media_player_data_load">There was an error loading the song.</string>
 </resources>
