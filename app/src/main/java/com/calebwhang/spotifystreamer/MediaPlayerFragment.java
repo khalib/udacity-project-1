@@ -65,8 +65,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     private MediaPlayerService mMediaPlayerService;
     private TrackParcelable mCurrentTrack;
     private boolean mIsMediaServiceBound;
-    private boolean mIsMediaPlaying = false;
-    private boolean mIsMediaPaused = false;
     private Handler mHandler = new Handler();
     private ShareActionProvider mShareActionProvider;
     private String mShareText;
@@ -94,7 +92,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         View rootView = inflater.inflate(R.layout.fragment_media_player, container, false);
 
         if (savedInstanceState != null) {
-            mIsMediaPlaying = savedInstanceState.getBoolean(IS_MEDIA_PLAYING_KEY);
+
         }
 
         // Load view elements.
@@ -123,7 +121,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
                 Log.v(LOG_TAG, "PREVIOUS TAPPED");
 
                 mMediaPlayerService.playPreviousTrack();
-                mIsMediaPlaying = true;
                 loadTrackInfo();
                 renderControlButtons(false);
             }
@@ -135,7 +132,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
                 Log.v(LOG_TAG, "NEXT TAPPED");
 
                 mMediaPlayerService.playNextTrack();
-                mIsMediaPlaying = true;
                 loadTrackInfo();
                 renderControlButtons(false);
             }
@@ -193,7 +189,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         Log.v(LOG_TAG, "===== onSaveInstanceState()");
 
         // Store activity states.
-        outState.putBoolean(IS_MEDIA_PLAYING_KEY, mIsMediaPlaying);
 
         super.onSaveInstanceState(outState);
     }
@@ -368,7 +363,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
      */
     private void startPlayback() {
         mMediaPlayerService.playTrack();
-        mIsMediaPlaying = true;
         renderControlButtons(false);
     }
 
@@ -380,8 +374,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         mHandler.removeCallbacks(mUpdateSeekBarTask);
 
         mMediaPlayerService.pauseTrack();
-        mIsMediaPlaying = false;
-        mIsMediaPaused = true;
 
         // Swap out the play/pause buttons.
         renderControlButtons(true);
@@ -431,13 +423,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
                     mCurrentTrack.name,
                     mCurrentTrack.artist,
                     mCurrentTrack.externalSpotifyUrl);
-
-            // Prevent the media from simultaneously playing multiple times.
-            if (!mIsMediaPlaying) {
-                mIsMediaPlaying = true;
-                mUpdateSeekBarTask.run();
-                renderControlButtons(false);
-            }
         }
 
         @Override
