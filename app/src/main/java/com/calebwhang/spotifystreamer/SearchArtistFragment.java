@@ -131,6 +131,6 @@ public class SearchArtistFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         mSearchText = "d";
-        getArtistSearchResults();
+//        getArtistSearchResults();
     }
 }

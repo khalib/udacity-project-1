@@ -45,8 +45,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     private final Integer ALBUM_COVER_IMAGE_WIDTH = 1200;
     private final Integer ALBUM_COVER_IMAGE_HEIGHT = 1200;
     private final Integer SEEK_BAR_TASK_UPDATE = 1000;  // in milliseconds
-    private final Float BUTTON_DISABLED_OPACITY = (float) 0.35;
-    private final Float BUTTON_ENABLED_OPACITY = (float) 1.0;
     private final String IS_MEDIA_PLAYING_KEY = "is_media_playing";
 
     // View elements.
@@ -342,19 +340,19 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         // Next track states.
         if (!mMediaPlayerService.hasNextTrack()) {
             mNextTrackButton.setClickable(false);
-            mNextTrackButton.setAlpha(BUTTON_DISABLED_OPACITY);
+            mNextTrackButton.setAlpha(MediaPlayerService.BUTTON_DISABLED_OPACITY);
         } else {
             mNextTrackButton.setClickable(true);
-            mNextTrackButton.setAlpha(BUTTON_ENABLED_OPACITY);
+            mNextTrackButton.setAlpha(MediaPlayerService.BUTTON_ENABLED_OPACITY);
         }
 
         // Previous track states.
         if (!mMediaPlayerService.hasPreviousTrack()) {
             mPreviousTrackButton.setClickable(false);
-            mPreviousTrackButton.setAlpha(BUTTON_DISABLED_OPACITY);
+            mPreviousTrackButton.setAlpha(MediaPlayerService.BUTTON_DISABLED_OPACITY);
         } else {
             mPreviousTrackButton.setClickable(true);
-            mPreviousTrackButton.setAlpha(BUTTON_ENABLED_OPACITY);
+            mPreviousTrackButton.setAlpha(MediaPlayerService.BUTTON_ENABLED_OPACITY);
         }
     }
 
@@ -383,12 +381,11 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
      * Loads the track info to be displayed.
      */
     private void loadTrackInfo() {
-        if (mMediaPlayerService != null) {
-
-        }
         mCurrentTrack = mMediaPlayerService.getCurrentTrack();
 
-        mArtistView.setText(mCurrentTrack.artist);
+        mArtistView.setText(mCurrentTrack.artist
+
+        );
         mAlbumView.setText(mCurrentTrack.album);
         mTrackView.setText(mCurrentTrack.name);
         mCurrentTimeView.setText(getReadableTimeDuration(0));
@@ -400,6 +397,9 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
                 .resize(ALBUM_COVER_IMAGE_WIDTH, ALBUM_COVER_IMAGE_HEIGHT)
                 .error(getActivity().getResources().getDrawable(R.mipmap.ic_launcher))
                 .into(mAlbumCoverView);
+
+        // Display the correct controls.
+        renderControlButtons(false);
     }
 
     /**

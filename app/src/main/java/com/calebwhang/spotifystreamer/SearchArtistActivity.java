@@ -1,9 +1,11 @@
 package com.calebwhang.spotifystreamer;
 
+import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -20,12 +22,14 @@ public class SearchArtistActivity extends ActionBarActivity implements
         SearchArtistFragment.Callback, TopTracksFragment.Callback {
 
     private final String LOG_TAG = SearchArtistActivity.class.getSimpleName();
+
     private static final String TOP_TRACKS_ACTIVITY_FRAGMENT_TAG = "top_tracks_activity_fragment";
 
     private MediaPlayerService mMediaPlayerService;
     private boolean mIsMediaServiceBound;
     private boolean mTwoPane;
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +48,7 @@ public class SearchArtistActivity extends ActionBarActivity implements
             mTwoPane = false;
         }
 
-        // Bind to MediaPlayerService¬
+        // Bind to MediaPlayerService.
         Intent intent = new Intent(this, MediaPlayerService.class);
         bindService(intent, mMediaPlayerConnection, Context.BIND_AUTO_CREATE);
     }
@@ -111,6 +115,14 @@ public class SearchArtistActivity extends ActionBarActivity implements
             MediaPlayerService.MediaPlayerServiceBinder binder = (MediaPlayerService.MediaPlayerServiceBinder) service;
             mMediaPlayerService = binder.getService();
             mIsMediaServiceBound = true;
+
+            // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
+            mMediaPlayerService.setTrackList(mTracks);
+            mMediaPlayerService.setTrack(0);
+            mMediaPlayerService.playTrack();
+            Log.v(LOG_TAG, "==============================================================================");
+            Log.v(LOG_TAG, "TEST TRACK PLAYING");
+            // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
         }
 
         @Override
@@ -118,5 +130,34 @@ public class SearchArtistActivity extends ActionBarActivity implements
             mIsMediaServiceBound = false;
         }
     };
+
+    // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
+    private TrackParcelable mCurrentTrack = getTracks().get(0);
+    private ArrayList<TrackParcelable> mTracks = getTracks();
+    private ArrayList<TrackParcelable> getTracks() {
+        ArrayList<TrackParcelable> tracks = new ArrayList<TrackParcelable>();
+
+        TrackParcelable trackParcelable = new TrackParcelable();
+        trackParcelable = new TrackParcelable();
+        trackParcelable.previewUrl = "https://p.scdn.co/mp3-preview/a0a9e25b7802988350236ee30032e9dbfc516a4d";
+        trackParcelable.previewDuration = 30000;
+        trackParcelable.name = "La Vie Boheme";
+        trackParcelable.artist = "Original Broadway Cast \"Rent\"";
+        trackParcelable.album = "Rent";
+        trackParcelable.image = "https://i.scdn.co/image/b0ae1df3a46bc28db3bc8f322033437e93431e07";
+        tracks.add(trackParcelable);
+
+        trackParcelable = new TrackParcelable();
+        trackParcelable.previewUrl = "https://p.scdn.co/mp3-preview/273011743128c96a68595dc2ff700483e1623a07";
+        trackParcelable.previewDuration = 30000;
+        trackParcelable.name = "Learning To Fly";
+        trackParcelable.artist = "Foo Fighters";
+        trackParcelable.album = "Foo Fighters (album)";
+        trackParcelable.image = "https://i.scdn.co/image/681e1253512a49cd0e84202573daca388aaa8bad";
+        tracks.add(trackParcelable);
+
+        return tracks;
+    }
+    // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
 
 }
