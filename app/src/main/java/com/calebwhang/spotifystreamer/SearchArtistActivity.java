@@ -24,33 +24,33 @@ public class SearchArtistActivity extends ActionBarActivity implements
     private final String LOG_TAG = SearchArtistActivity.class.getSimpleName();
 
     private static final String TOP_TRACKS_ACTIVITY_FRAGMENT_TAG = "top_tracks_activity_fragment";
+    private final String INSTANCE_STATE_IS_MEDIA_SERVICE_BOUND_KEY = "instance_state_is_media_service_bound";
 
     private MediaPlayerService mMediaPlayerService;
-    private boolean mIsMediaServiceBound;
+    private boolean mIsMediaServiceBound = false;
     private boolean mTwoPane;
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_search_artist);
+
+        if (savedInstanceState == null) {
+            // Bind to MediaPlayerService.
+            Intent intent = new Intent(this, MediaPlayerService.class);
+            bindService(intent, mMediaPlayerConnection, Context.BIND_AUTO_CREATE);
+        } else {
+            mIsMediaServiceBound = savedInstanceState.getBoolean(INSTANCE_STATE_IS_MEDIA_SERVICE_BOUND_KEY);
+        }
 
         // Check and set if a larger screen is being used.
         if (findViewById(R.id.top_tracks_detail_container) != null) {
             mTwoPane = true;
-
-//            if (savedInstanceState == null) {
-//                getSupportFragmentManager().beginTransaction()
-//                        .add(R.id.fragment_artist_search, new SearchArtistFragment())
-//                        .commit();
-//            }
         } else {
             mTwoPane = false;
         }
-
-        // Bind to MediaPlayerService.
-        Intent intent = new Intent(this, MediaPlayerService.class);
-        bindService(intent, mMediaPlayerConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -75,6 +75,13 @@ public class SearchArtistActivity extends ActionBarActivity implements
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        // Save states.
+        outState.putBoolean(INSTANCE_STATE_IS_MEDIA_SERVICE_BOUND_KEY, mIsMediaServiceBound);
+
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     public void onArtistSelected(ArtistParcelable artistParcelable) {
@@ -115,14 +122,6 @@ public class SearchArtistActivity extends ActionBarActivity implements
             MediaPlayerService.MediaPlayerServiceBinder binder = (MediaPlayerService.MediaPlayerServiceBinder) service;
             mMediaPlayerService = binder.getService();
             mIsMediaServiceBound = true;
-
-            // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
-            mMediaPlayerService.setTrackList(mTracks);
-            mMediaPlayerService.setTrack(0);
-            mMediaPlayerService.playTrack();
-            Log.v(LOG_TAG, "==============================================================================");
-            Log.v(LOG_TAG, "TEST TRACK PLAYING");
-            // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
         }
 
         @Override
@@ -130,34 +129,5 @@ public class SearchArtistActivity extends ActionBarActivity implements
             mIsMediaServiceBound = false;
         }
     };
-
-    // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
-    private TrackParcelable mCurrentTrack = getTracks().get(0);
-    private ArrayList<TrackParcelable> mTracks = getTracks();
-    private ArrayList<TrackParcelable> getTracks() {
-        ArrayList<TrackParcelable> tracks = new ArrayList<TrackParcelable>();
-
-        TrackParcelable trackParcelable = new TrackParcelable();
-        trackParcelable = new TrackParcelable();
-        trackParcelable.previewUrl = "https://p.scdn.co/mp3-preview/a0a9e25b7802988350236ee30032e9dbfc516a4d";
-        trackParcelable.previewDuration = 30000;
-        trackParcelable.name = "La Vie Boheme";
-        trackParcelable.artist = "Original Broadway Cast \"Rent\"";
-        trackParcelable.album = "Rent";
-        trackParcelable.image = "https://i.scdn.co/image/b0ae1df3a46bc28db3bc8f322033437e93431e07";
-        tracks.add(trackParcelable);
-
-        trackParcelable = new TrackParcelable();
-        trackParcelable.previewUrl = "https://p.scdn.co/mp3-preview/273011743128c96a68595dc2ff700483e1623a07";
-        trackParcelable.previewDuration = 30000;
-        trackParcelable.name = "Learning To Fly";
-        trackParcelable.artist = "Foo Fighters";
-        trackParcelable.album = "Foo Fighters (album)";
-        trackParcelable.image = "https://i.scdn.co/image/681e1253512a49cd0e84202573daca388aaa8bad";
-        tracks.add(trackParcelable);
-
-        return tracks;
-    }
-    // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
 
 }

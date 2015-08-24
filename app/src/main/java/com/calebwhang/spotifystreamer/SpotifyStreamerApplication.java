@@ -22,7 +22,7 @@ public class SpotifyStreamerApplication extends Application {
         super.onCreate();
 
         // Create service manager for the Media Player Service.
-        mServiceManager = new ServiceManager(this, MediaPlayerService.class);
+//        mServiceManager = new ServiceManager(this, MediaPlayerService.class);
     }
 
     /**

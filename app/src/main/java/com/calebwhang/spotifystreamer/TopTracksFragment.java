@@ -58,9 +58,11 @@ public class TopTracksFragment extends Fragment implements SpotifyArtistTopTrack
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Bind to MediaPlayerService
-        Intent intent = new Intent(getActivity(), MediaPlayerService.class);
-        getActivity().bindService(intent, mMediaPlayerConnection, Context.BIND_AUTO_CREATE);
+        if (savedInstanceState == null) {
+            // Bind to MediaPlayerService
+            Intent intent = new Intent(getActivity(), MediaPlayerService.class);
+            getActivity().bindService(intent, mMediaPlayerConnection, Context.BIND_AUTO_CREATE);
+        }
     }
 
     @Override

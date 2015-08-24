@@ -130,7 +130,7 @@ public class SearchArtistFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mSearchText = "d";
-//        getArtistSearchResults();
+        mSearchText = "foo";
+        getArtistSearchResults();
     }
 }

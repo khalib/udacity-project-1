@@ -17,7 +17,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_weight="3">
+        android:layout_weight="3"
+        android:layout_gravity="center_vertical">
 
         <TextView
             android:id="@+id/notification_track_textview"
@@ -48,7 +49,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_weight="2">
+        android:layout_weight="2"
+        android:layout_gravity="center_vertical">
 
         <ImageButton
             android:id="@+id/notification_previous_imagebutton"
@@ -59,14 +61,36 @@
             android:src="@android:drawable/ic_media_previous"
             android:background="@color/background_floating_material_dark" />
 
+        <ImageView
+            android:id="@+id/notification_previous_imagebutton_disabled"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="@dimen/notification_button_height"
+            android:scaleType="fitCenter"
+            android:src="@android:drawable/ic_media_previous"
+            android:background="@color/background_floating_material_dark"
+            android:alpha=".35"
+            android:visibility="gone" />
+
+
         <ImageButton
-            android:id="@+id/notification_play_pause_imagebutton"
+            android:id="@+id/notification_play_imagebutton"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="@dimen/notification_button_height"
             android:scaleType="fitCenter"
             android:src="@android:drawable/ic_media_play"
             android:background="@color/background_floating_material_dark" />
+
+        <ImageButton
+            android:id="@+id/notification_pause_imagebutton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="@dimen/notification_button_height"
+            android:scaleType="fitCenter"
+            android:src="@android:drawable/ic_media_pause"
+            android:background="@color/background_floating_material_dark"
+            android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/notification_next_imagebutton"
@@ -76,6 +100,17 @@
             android:scaleType="fitCenter"
             android:src="@android:drawable/ic_media_ff"
             android:background="@color/background_floating_material_dark" />
+
+        <ImageView
+            android:id="@+id/notification_next_imagebutton_disabled"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="@dimen/notification_button_height"
+            android:scaleType="fitCenter"
+            android:src="@android:drawable/ic_media_ff"
+            android:background="@color/background_floating_material_dark"
+            android:alpha=".35"
+            android:visibility="gone" />
     </LinearLayout>
 
 </LinearLayout>

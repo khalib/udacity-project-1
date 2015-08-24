@@ -38,10 +38,6 @@
         </activity>
 
         <service android:name=".service.MediaPlayerService" />
-
-        <!--<receiver-->
-            <!--android:name=".service.MediaPlayerService$MediaPlayerBroadcastReceiver"-->
-            <!--android:enabled="true"/>-->
     </application>
 
 </manifest>

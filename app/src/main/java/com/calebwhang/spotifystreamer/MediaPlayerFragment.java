@@ -35,16 +35,20 @@ import java.util.Date;
 
 
 /**
- * A placeholder fragment containing a simple view.
+ * Media player controls which works with the MediaPlayerService that plays audio tracks and
+ * displays the meta data of the track being played.
  */
 public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSeekBarChangeListener,
         MediaPlayer.OnCompletionListener {
 
     private final String LOG_TAG = MediaPlayerFragment.class.getSimpleName();
 
+    private final String INSTANCE_STATE_IS_MEDIA_SERVICE_BOUND_KEY = "instance_state_is_media_service_bound_key";
+    private final String INSTANCE_STATE_CURRENT_TRACK_KEY = "instance_state_current_track_key";
+    private final String INSTANCE_STATE_IS_PLAYING_KEY = "instance_state_is_playing_key";
     private final Integer ALBUM_COVER_IMAGE_WIDTH = 1200;
     private final Integer ALBUM_COVER_IMAGE_HEIGHT = 1200;
-    private final Integer SEEK_BAR_TASK_UPDATE = 1000;  // in milliseconds
+    private final Integer SEEK_BAR_TASK_UPDATE = 1;  // in milliseconds
     private final String IS_MEDIA_PLAYING_KEY = "is_media_playing";
 
     // View elements.
@@ -66,6 +70,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     private Handler mHandler = new Handler();
     private ShareActionProvider mShareActionProvider;
     private String mShareText;
+    private boolean mIsPlaying;
 
     public MediaPlayerFragment() {
 
@@ -77,9 +82,15 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
         super.onCreate(savedInstanceState);
 
-        // Bind to MediaPlayerService
-        Intent intent = new Intent(getActivity(), MediaPlayerService.class);
-        getActivity().bindService(intent, mMediaPlayerConnection, Context.BIND_AUTO_CREATE);
+        if (savedInstanceState == null) {
+            // Bind to MediaPlayerService
+            Intent intent = new Intent(getActivity(), MediaPlayerService.class);
+            getActivity().bindService(intent, mMediaPlayerConnection, Context.BIND_AUTO_CREATE);
+        } else {
+            mIsMediaServiceBound = savedInstanceState.getBoolean(INSTANCE_STATE_IS_MEDIA_SERVICE_BOUND_KEY);
+            mIsPlaying = savedInstanceState.getBoolean(INSTANCE_STATE_IS_PLAYING_KEY);
+            mCurrentTrack = savedInstanceState.getParcelable(INSTANCE_STATE_CURRENT_TRACK_KEY);
+        }
     }
 
     @Override
@@ -88,10 +99,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         Log.v(LOG_TAG, "===== onCreateView()");
 
         View rootView = inflater.inflate(R.layout.fragment_media_player, container, false);
-
-        if (savedInstanceState != null) {
-
-        }
 
         // Load view elements.
         mArtistView = (TextView) rootView.findViewById(R.id.track_artist_textview);
@@ -112,15 +119,12 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         // Enable the menu.
         setHasOptionsMenu(true);
 
-        // Set button tap handlers.
+        // Set button click handlers.
         mPreviousTrackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.v(LOG_TAG, "PREVIOUS TAPPED");
-
-                mMediaPlayerService.playPreviousTrack();
-                loadTrackInfo();
-                renderControlButtons(false);
+                playPreviousTrack();
             }
         });
 
@@ -128,10 +132,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
             @Override
             public void onClick(View v) {
                 Log.v(LOG_TAG, "NEXT TAPPED");
-
-                mMediaPlayerService.playNextTrack();
-                loadTrackInfo();
-                renderControlButtons(false);
+                playNextTrack();
             }
         });
 
@@ -139,7 +140,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
             @Override
             public void onClick(View v) {
                 Log.v(LOG_TAG, "PLAY TAPPED");
-
                 startPlayback();
             }
         });
@@ -148,7 +148,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
             @Override
             public void onClick(View v) {
                 Log.v(LOG_TAG, "PAUSE TAPPED");
-
                 pausePlayback();
             }
         });
@@ -187,6 +186,9 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         Log.v(LOG_TAG, "===== onSaveInstanceState()");
 
         // Store activity states.
+        outState.putBoolean(INSTANCE_STATE_IS_MEDIA_SERVICE_BOUND_KEY, mIsMediaServiceBound);
+        outState.putBoolean(INSTANCE_STATE_IS_PLAYING_KEY, mIsPlaying);
+        outState.putParcelable(INSTANCE_STATE_CURRENT_TRACK_KEY, mCurrentTrack);
 
         super.onSaveInstanceState(outState);
     }
@@ -203,8 +205,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     public void onStartTrackingTouch(SeekBar seekBar) {
         Log.v(LOG_TAG, "===== onStartTrackingTouch()");
 
-        // Stop the seek bar updates while the user slides the seek bar around.
-        mHandler.removeCallbacks(mUpdateSeekBarTask);
+        stopSeekBarUpdateTask();
     }
 
     @Override
@@ -219,14 +220,14 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     public void onCompletion(MediaPlayer mp) {
         Log.v(LOG_TAG, "===== onCompletion()");
 
-        renderControlButtons(false);
-
-        // Play the next track.
+        mIsPlaying = false;
+        renderControlButtons();
     }
 
     /**
+     * Creates the share intent for sharing the current track being played.
      *
-     * @return
+     * @return the constructed shared intent.
      */
     private Intent createShareTrackIntent() {
         // Create the share intent.
@@ -240,8 +241,9 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
     /**
      * Converts a time given in milliseconds to a human readable format.
-     * @param time
-     * @return A human readable time in the format mm:ss
+     *
+     * @param time a date/time in unixtimestamp format.
+     * @return a human readable time in the format mm:ss
      */
     public String getReadableTimeDuration(long time) {
         Date date = new Date(time);
@@ -251,6 +253,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
     /**
      * Gets the Progress percentage
+     *
      * @param currentDuration
      * @param totalDuration
      * */
@@ -278,9 +281,14 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
                 // Update the seek bar and the current time.
                 mMediaSeekBar.setProgress(progress);
                 mCurrentTimeView.setText(getReadableTimeDuration(currentPosition));
-            }
 
-            runSeekBarUpdateTask();
+                // Update states when track is done playing.
+                if (progress == 100) {
+                    stopPlayback();
+                } else {
+                    runSeekBarUpdateTask();
+                }
+            }
         }
     };
 
@@ -292,13 +300,18 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     }
 
     /**
+     * Stop the track seek bar progress display updates.
+     */
+    private void stopSeekBarUpdateTask() {
+        mHandler.removeCallbacks(mUpdateSeekBarTask);
+    }
+
+    /**
      * Handles updates to the progress displays when the seek bar is moved.
+     *
      * @param seekToPosition whether the track should be updated to where the seek bar is.
      */
     private void updateSeekBar(boolean seekToPosition) {
-        // Stop the track progress display updates.
-        mHandler.removeCallbacks(mUpdateSeekBarTask);
-
         // Calculate positions.
         int currentPosition = mMediaSeekBar.getProgress();
         int position = (int) (currentPosition * mCurrentTrack.previewDuration / 100);
@@ -323,18 +336,16 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
      *   Pause: Displayed when media is playing.
      *   Next: Clickable if a next track is available.
      *   Previous: Clickable if a previous track is available.
-     *
-     * @param showPlayButton whether or not the play button should be visible.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void renderControlButtons(boolean showPlayButton) {
+    private void renderControlButtons() {
         // Play/Pause states.
-        if (showPlayButton) {
-            mPlayTrackButton.setVisibility(View.VISIBLE);
-            mPausePlaybackButton.setVisibility(View.GONE);
-        } else {
+        if (mIsPlaying) {
             mPlayTrackButton.setVisibility(View.GONE);
             mPausePlaybackButton.setVisibility(View.VISIBLE);
+        } else {
+            mPlayTrackButton.setVisibility(View.VISIBLE);
+            mPausePlaybackButton.setVisibility(View.GONE);
         }
 
         // Next track states.
@@ -360,21 +371,56 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
      * Handles the actions for when the player is played from the interface.
      */
     private void startPlayback() {
-        mMediaPlayerService.playTrack();
-        renderControlButtons(false);
+        mMediaPlayerService.playTrack(true);
+        mIsPlaying = true;
+
+        runSeekBarUpdateTask();
+        renderControlButtons();
+    }
+
+    /**
+     * Handles the actions for when the player is stopped from the interface.
+     */
+    private void stopPlayback() {
+        mIsPlaying = false;
+
+        stopSeekBarUpdateTask();
+        renderControlButtons();
     }
 
     /**
      * Handles the actions for when the player is paused from the interface.
      */
     private void pausePlayback() {
-        // Stop the track progress display updates.
-        mHandler.removeCallbacks(mUpdateSeekBarTask);
-
         mMediaPlayerService.pauseTrack();
+        mIsPlaying = false;
 
-        // Swap out the play/pause buttons.
-        renderControlButtons(true);
+        stopSeekBarUpdateTask();
+        renderControlButtons();
+    }
+
+    /**
+     * Handles the actions for when the next track is selected in the interface.
+     */
+    private void playNextTrack() {
+        mMediaPlayerService.playNextTrack();
+        mIsPlaying = true;
+
+        loadTrackInfo();
+        runSeekBarUpdateTask();
+        renderControlButtons();
+    }
+
+    /**
+     * Handles the actions for when the next track is selected in the interface.
+     */
+    private void playPreviousTrack() {
+        mMediaPlayerService.playPreviousTrack();
+        mIsPlaying = true;
+
+        loadTrackInfo();
+        runSeekBarUpdateTask();
+        renderControlButtons();
     }
 
     /**
@@ -383,9 +429,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     private void loadTrackInfo() {
         mCurrentTrack = mMediaPlayerService.getCurrentTrack();
 
-        mArtistView.setText(mCurrentTrack.artist
-
-        );
+        mArtistView.setText(mCurrentTrack.artist);
         mAlbumView.setText(mCurrentTrack.album);
         mTrackView.setText(mCurrentTrack.name);
         mCurrentTimeView.setText(getReadableTimeDuration(0));
@@ -399,11 +443,17 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
                 .into(mAlbumCoverView);
 
         // Display the correct controls.
-        renderControlButtons(false);
+        renderControlButtons();
+
+        // Construct the text to be shared.
+        mShareText = String.format(getActivity().getString(R.string.format_track_share_notification),
+                mCurrentTrack.name,
+                mCurrentTrack.artist,
+                mCurrentTrack.externalSpotifyUrl);
     }
 
     /**
-     *
+     * Manage MediaPlayerService connection.
      */
     private ServiceConnection mMediaPlayerConnection = new ServiceConnection() {
         @Override
@@ -413,16 +463,14 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
             MediaPlayerServiceBinder binder = (MediaPlayerServiceBinder) service;
             mMediaPlayerService = binder.getService();
             mCurrentTrack = mMediaPlayerService.getCurrentTrack();
+            mIsPlaying = true;
             mIsMediaServiceBound = true;
+
+            // Run the track progress display updates.
+            runSeekBarUpdateTask();
 
             // Load the track information into the view.
             loadTrackInfo();
-
-            // Construct the text to be shared.
-            mShareText = String.format(getActivity().getString(R.string.format_track_share_notification),
-                    mCurrentTrack.name,
-                    mCurrentTrack.artist,
-                    mCurrentTrack.externalSpotifyUrl);
         }
 
         @Override
