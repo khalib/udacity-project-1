@@ -1,16 +1,8 @@
 package com.calebwhang.spotifystreamer;
 
 import android.app.Application;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
 import android.util.Log;
 
-import com.calebwhang.spotifystreamer.service.MediaPlayerServiceListenerInterface;
-import com.calebwhang.spotifystreamer.service.MediaPlayerService;
-import com.calebwhang.spotifystreamer.service.MediaPlayerServiceConnection;
 import com.calebwhang.spotifystreamer.service.MediaPlayerServiceManager;
 
 /**
