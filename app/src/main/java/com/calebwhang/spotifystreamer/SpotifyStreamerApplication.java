@@ -14,17 +14,13 @@ import com.calebwhang.spotifystreamer.service.MediaPlayerServiceConnection;
 import com.calebwhang.spotifystreamer.service.MediaPlayerServiceManager;
 
 /**
- * Created by caleb on 8/19/15.
+ * An {@link Application} to maintain global application states.
  */
 public class SpotifyStreamerApplication extends Application {
 
     private final String LOG_TAG = SpotifyStreamerApplication.class.getSimpleName();
 
-    private MediaPlayerService mMediaPlayerService;
     private MediaPlayerServiceManager mMediaPlayerServiceManager;
-    private MediaPlayerServiceConnection mMediaPlayerServiceConnection;
-    private MediaPlayerServiceListenerInterface mMediaPlayerListener;
-    private boolean mIsMediaServiceBound;
 
     public SpotifyStreamerApplication() {}
 
@@ -36,9 +32,6 @@ public class SpotifyStreamerApplication extends Application {
 
         // Create service manager for the Media Player Service.
         mMediaPlayerServiceManager = new MediaPlayerServiceManager(this);
-
-//        Intent intent = new Intent(this, MediaPlayerService.class);
-//        mIsMediaServiceBound = bindService(intent, mMediaPlayerConnection, Context.BIND_AUTO_CREATE);
     }
 
     /**
@@ -51,35 +44,5 @@ public class SpotifyStreamerApplication extends Application {
 
         return mMediaPlayerServiceManager;
     }
-
-    /**
-     * Manage MediaPlayerService connection.
-     */
-//    private ServiceConnection mMediaPlayerConnection = new ServiceConnection() {
-//        @Override
-//        public void onServiceConnected(ComponentName name, IBinder service) {
-//            Log.v(LOG_TAG, "===== onServiceConnected() >> MediaPlayerService loaded");
-//
-//            MediaPlayerService.MediaPlayerServiceBinder binder = (MediaPlayerService.MediaPlayerServiceBinder) service;
-//            mMediaPlayerService = binder.getService();
-//        }
-//
-//        @Override
-//        public void onServiceDisconnected(ComponentName name) {
-//            unbindService(this);
-//            mIsMediaServiceBound = false;
-//        }
-//    };
-
-    /**
-     * Get the connected instance of the Media Player Service.
-     *
-     * @return
-     */
-//    public MediaPlayerService getMediaPlayerService() {
-//        Log.v(LOG_TAG, "===== getMediaPlayerService()");
-//
-//        return mMediaPlayerService;
-//    }
 
 }
