@@ -170,21 +170,14 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         Log.v(LOG_TAG, "===== onCreateOptionsMenu()");
 
         // Inflate the menu; this adds items to the action bar if it is present.
-        inflater.inflate(R.menu.menu_top_tracks_fragment, menu);
+        inflater.inflate(R.menu.menu_media_player_fragment, menu);
 
         // Retrieve the share menu item
         MenuItem menuItem = menu.findItem(R.id.action_share);
 
         // Get the provider and hold onto it to set/change the share intent.
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
-        mShareActionProvider.setShareIntent(createShareTrackIntent());
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        Log.v(LOG_TAG, "===== onSaveInstanceState()");
-
-        super.onSaveInstanceState(outState);
+//        mShareActionProvider.setShareIntent(createShareTrackIntent());
     }
 
     @Override

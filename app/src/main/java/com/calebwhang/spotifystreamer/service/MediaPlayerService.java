@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.calebwhang.spotifystreamer.MediaPlayerActivity;
 import com.calebwhang.spotifystreamer.MediaPlayerFragment;
 import com.calebwhang.spotifystreamer.R;
+import com.calebwhang.spotifystreamer.SearchArtistActivity;
 import com.calebwhang.spotifystreamer.TrackParcelable;
 import com.calebwhang.spotifystreamer.Utility;
 import com.squareup.picasso.Picasso;
@@ -426,17 +427,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
             mediaPlayerIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mediaPlayerIntent.putExtra(INTENT_EXTRA_IS_MODAL, false);
             startActivity(mediaPlayerIntent);
-
-            // The device is smaller, so show the fragment fullscreen
-//            FragmentTransaction transaction = fragmentManager.beginTransaction();
-//            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//            transaction.add(android.R.id.content, mediaPlayerFragment);
-//            transaction.addToBackStack(null);
-//            transaction.commit();
-
-//            mediaPlayerFragment.setShowsDialog(false);
-//            mediaPlayerFragment.setStyle(DialogFragment.STYLE_NORMAL, 0);
-//            mediaPlayerFragment.show(fragmentManager, "asdf");
         }
     }
 
@@ -474,12 +464,19 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
             visibility = Notification.VISIBILITY_SECRET;
         }
 
+        // Set the notification click behavior.
+        Intent mediaPlayerIntent = new Intent(this, SearchArtistActivity.class);
+        mediaPlayerIntent.setAction(Intent.ACTION_MAIN);
+        mediaPlayerIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        PendingIntent playerPendingIntent = PendingIntent.getActivity(this, 0, mediaPlayerIntent, 0);
+
+        // Build the notification.
         mNotification = new NotificationCompat.Builder(getApplicationContext())
                 .setVisibility(visibility)
-                .setAutoCancel(true)
                 .setContentTitle(mCurrentTrack.artist)
                 .setContentText(mCurrentTrack.name)
                 .setSmallIcon(android.R.drawable.ic_media_play)
+                .setContentIntent(playerPendingIntent)
                 .build();
 
         mNotificationContentView = getRemoteView(NOTIFICATION_NOW_PLAYING_VIEW_TYPE_COLLAPSED, mNotification);

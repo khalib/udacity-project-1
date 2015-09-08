@@ -1,8 +1,10 @@
 package com.calebwhang.spotifystreamer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -12,6 +14,8 @@ import com.calebwhang.spotifystreamer.service.MediaPlayerService;
  * Utility helper methods.
  */
 public class Utility {
+
+    private final static String LOG_TAG = Utility.class.getSimpleName();
 
     /**
      * Gets the preference settings for country code.
@@ -63,6 +67,8 @@ public class Utility {
      * @param menu
      */
     public static void displayCurrentTrackButton(MediaPlayerService mediaPlayerService, Menu menu) {
+        Log.v(LOG_TAG, "===== displayCurrentTrackButton()");
+
         // Display the "Now Playing" button if a track is playing.
         if (mediaPlayerService != null && menu != null) {
             MenuItem menuItem = menu.findItem(R.id.action_player);
