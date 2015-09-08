@@ -23,7 +23,6 @@ import android.widget.Toast;
 import com.calebwhang.spotifystreamer.MediaPlayerActivity;
 import com.calebwhang.spotifystreamer.MediaPlayerFragment;
 import com.calebwhang.spotifystreamer.R;
-import com.calebwhang.spotifystreamer.SearchArtistActivity;
 import com.calebwhang.spotifystreamer.SpotifyStreamerApplication;
 import com.calebwhang.spotifystreamer.TrackParcelable;
 import com.calebwhang.spotifystreamer.Utility;
@@ -72,6 +71,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     private OnTrackPlayListener mOnTrackPlayListener;
     private OnTrackPauseListener mOnTrackPauseListener;
     private OnTrackCompletionListener mOnTrackCompletionListener;
+    private OnTrackPreparedListener mOnTrackPreparedListener;
 
     public MediaPlayerService() {
 
@@ -89,38 +89,38 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     }
 
     /**
-     *
+     * Interface definition for a callback to be invoked when a track selection change has been made.
      */
     public interface OnTrackChangeListener {
         void onTrackChange();
     }
 
     /**
-     *
+     * Interface definition for a callback to be invoked when playback of a media source been paused.
      */
     public interface OnTrackPauseListener {
         void onTrackPause();
     }
 
     /**
-     *
+     * Interface definition for a callback to be invoked when playback of a media source has started.
      */
     public interface OnTrackPlayListener {
         void onTrackPlay();
     }
 
     /**
-     *
+     * Interface definition for a callback to be invoked when playback of a media source has completed.
      */
     public interface OnTrackCompletionListener {
         void onTrackCompletion();
     }
 
     /**
-     *
+     * Interface definition for a callback to be invoked when the selected media source is loaded.
      */
-    public interface OnTrackSetListener {
-        void onTrackSet();
+    public interface OnTrackPreparedListener {
+        void onTrackPrepared();
     }
 
     @Override
@@ -187,6 +187,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
 
         mp.start();
         showNotification();
+
+        // Invoke callback.
+        if (mOnTrackPreparedListener != null) {
+            mOnTrackPreparedListener.onTrackPrepared();
+        }
     }
 
     /**
@@ -637,6 +642,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      */
     public void setOnTrackCompletionListener(OnTrackCompletionListener listener) {
         mOnTrackCompletionListener = listener;
+    }
+
+    /**
+     * Register a callback to be invoked when the media track has finished loading.
+     *
+     * @param listener the callback that will be run.
+     */
+    public void setOnTrackPreparedListener(OnTrackPreparedListener listener) {
+        mOnTrackPreparedListener = listener;
     }
 
 }

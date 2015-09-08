@@ -41,7 +41,8 @@ import java.util.Date;
 public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSeekBarChangeListener,
         MediaPlayer.OnCompletionListener, MediaPlayerServiceListenerInterface,
         MediaPlayerService.OnTrackChangeListener, MediaPlayerService.OnTrackPlayListener,
-        MediaPlayerService.OnTrackPauseListener, MediaPlayerService.OnTrackCompletionListener {
+        MediaPlayerService.OnTrackPauseListener, MediaPlayerService.OnTrackCompletionListener,
+        MediaPlayerService.OnTrackPreparedListener {
 
     private final String LOG_TAG = MediaPlayerFragment.class.getSimpleName();
 
@@ -68,7 +69,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     private TrackParcelable mCurrentTrack;
     private Handler mHandler = new Handler();
     private ShareActionProvider mShareActionProvider;
-    private boolean mIsPlaying;
 
     public MediaPlayerFragment() {
 
@@ -207,7 +207,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     public void onCompletion(MediaPlayer mp) {
         Log.v(LOG_TAG, "===== onCompletion()");
 
-        mIsPlaying = false;
         renderControlButtons();
     }
 
@@ -333,7 +332,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void renderControlButtons() {
         // Play/Pause states.
-        if (mIsPlaying) {
+        if (mMediaPlayerService.isPlaying()) {
             mPlayTrackButton.setVisibility(View.GONE);
             mPausePlaybackButton.setVisibility(View.VISIBLE);
         } else {
@@ -365,7 +364,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
      */
     private void startPlayback() {
         mMediaPlayerService.playTrack(true);
-        mIsPlaying = true;
 
         runSeekBarUpdateTask();
         renderControlButtons();
@@ -375,8 +373,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
      * Handles the actions for when the player is stopped from the interface.
      */
     private void stopPlayback() {
-        mIsPlaying = false;
-
         stopSeekBarUpdateTask();
         renderControlButtons();
     }
@@ -386,7 +382,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
      */
     private void pausePlayback() {
         mMediaPlayerService.pauseTrack();
-        mIsPlaying = false;
 
         stopSeekBarUpdateTask();
         renderControlButtons();
@@ -397,7 +392,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
      */
     private void playNextTrack() {
         mMediaPlayerService.playNextTrack();
-        mIsPlaying = true;
 
         loadTrackInfo();
         runSeekBarUpdateTask();
@@ -409,7 +403,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
      */
     private void playPreviousTrack() {
         mMediaPlayerService.playPreviousTrack();
-        mIsPlaying = true;
 
         loadTrackInfo();
         runSeekBarUpdateTask();
@@ -453,10 +446,10 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         mMediaPlayerService.setOnTrackPlayListener(this);
         mMediaPlayerService.setOnTrackPauseListener(this);
         mMediaPlayerService.setOnTrackCompletionListener(this);
+        mMediaPlayerService.setOnTrackPreparedListener(this);
 
         // Get track info/state.
         mCurrentTrack = mMediaPlayerService.getCurrentTrack();
-        mIsPlaying = mMediaPlayerService.isPlaying();
 
         // Run the track progress display updates.
         runSeekBarUpdateTask();
@@ -469,7 +462,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     public void onTrackChange() {
         Log.v(LOG_TAG, "===== onTrackChange()");
 
-        mIsPlaying = true;
         loadTrackInfo();
     }
 
@@ -477,7 +469,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     public void onTrackPause() {
         Log.v(LOG_TAG, "===== onTrackPause()");
 
-        mIsPlaying = false;
         renderControlButtons();
     }
 
@@ -485,7 +476,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     public void onTrackPlay() {
         Log.v(LOG_TAG, "===== onTrackPlay()");
 
-        mIsPlaying = true;
         renderControlButtons();
     }
 
@@ -493,7 +483,13 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     public void onTrackCompletion() {
         Log.v(LOG_TAG, "===== onTrackCompletion()");
 
-        mIsPlaying = false;
+        renderControlButtons();
+    }
+
+    @Override
+    public void onTrackPrepared() {
+        Log.v(LOG_TAG, "===== onTrackPrepared()");
+
         renderControlButtons();
     }
 }
