@@ -44,6 +44,11 @@ public class SpotifyStreamerApplication extends Application {
         return mMediaPlayerServiceManager;
     }
 
+    /**
+     * A static call to get the application context.
+     *
+     * @return the application context.
+     */
     public static Context getStaticApplicationContext() {
         return mContext;
     }
