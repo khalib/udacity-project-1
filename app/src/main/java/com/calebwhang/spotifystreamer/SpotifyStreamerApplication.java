@@ -1,6 +1,7 @@
 package com.calebwhang.spotifystreamer;
 
 import android.app.Application;
+import android.content.Context;
 import android.util.Log;
 
 import com.calebwhang.spotifystreamer.service.MediaPlayerServiceManager;
@@ -13,14 +14,20 @@ public class SpotifyStreamerApplication extends Application {
     private final String LOG_TAG = SpotifyStreamerApplication.class.getSimpleName();
 
     private MediaPlayerServiceManager mMediaPlayerServiceManager;
+    private static Context mContext;
 
-    public SpotifyStreamerApplication() {}
+    public SpotifyStreamerApplication() {
+
+    }
 
     @Override
     public void onCreate() {
         Log.v(LOG_TAG, "===== onCreate()");
 
         super.onCreate();
+
+        // Set context for static calls.
+        mContext = this.getApplicationContext();
 
         // Create service manager for the Media Player Service.
         mMediaPlayerServiceManager = new MediaPlayerServiceManager(this);
@@ -35,6 +42,10 @@ public class SpotifyStreamerApplication extends Application {
         Log.v(LOG_TAG, "===== getServiceManager()");
 
         return mMediaPlayerServiceManager;
+    }
+
+    public static Context getStaticApplicationContext() {
+        return mContext;
     }
 
 }

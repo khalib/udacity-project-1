@@ -72,7 +72,7 @@ public class SpotifyStreamerActivity extends ActionBarActivity implements
                 return true;
 
             case R.id.action_player:
-                mMediaPlayerService.displayMediaPlayer(getSupportFragmentManager(), mIsLargeLayout);
+                MediaPlayerService.displayMediaPlayer(getSupportFragmentManager(), mIsLargeLayout);
                 break;
         }
 
@@ -92,5 +92,8 @@ public class SpotifyStreamerActivity extends ActionBarActivity implements
         Log.v(LOG_TAG, "===== onServiceConnected()");
 
         mMediaPlayerService = mediaPlayerService;
+
+        // Display media player from notification click.
+//        MediaPlayerService.displayMediaPlayer(getSupportFragmentManager(), false);
     }
 }

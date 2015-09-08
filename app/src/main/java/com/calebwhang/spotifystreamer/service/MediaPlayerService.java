@@ -24,6 +24,7 @@ import com.calebwhang.spotifystreamer.MediaPlayerActivity;
 import com.calebwhang.spotifystreamer.MediaPlayerFragment;
 import com.calebwhang.spotifystreamer.R;
 import com.calebwhang.spotifystreamer.SearchArtistActivity;
+import com.calebwhang.spotifystreamer.SpotifyStreamerApplication;
 import com.calebwhang.spotifystreamer.TrackParcelable;
 import com.calebwhang.spotifystreamer.Utility;
 import com.squareup.picasso.Picasso;
@@ -412,7 +413,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * @param fragmentManager
      * @param isModal
      */
-    public void displayMediaPlayer(FragmentManager fragmentManager, boolean isModal) {
+    public static void displayMediaPlayer(FragmentManager fragmentManager, boolean isModal) {
         Log.v(LOG_TAG, "===== displayMediaPlayer()");
 
         MediaPlayerFragment mediaPlayerFragment = new MediaPlayerFragment();
@@ -423,10 +424,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
         } else {
             Log.v(LOG_TAG, "===== getShowsDialog(): " + Boolean.toString(mediaPlayerFragment.getShowsDialog()));
 
-            Intent mediaPlayerIntent = new Intent(getApplicationContext(), MediaPlayerActivity.class);
+            Context appContext = SpotifyStreamerApplication.getStaticApplicationContext();
+            Intent mediaPlayerIntent = new Intent(appContext, MediaPlayerActivity.class);
             mediaPlayerIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mediaPlayerIntent.putExtra(INTENT_EXTRA_IS_MODAL, false);
-            startActivity(mediaPlayerIntent);
+            appContext.startActivity(mediaPlayerIntent);
         }
     }
 
