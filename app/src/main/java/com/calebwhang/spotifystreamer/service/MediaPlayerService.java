@@ -41,6 +41,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     private static final String LOG_TAG = MediaPlayerService.class.getSimpleName();
 
     public static final String INTENT_EXTRA_IS_MODAL = "intent_extra_is_modal";
+    public static final String INTENT_EXTRA_NOTIFICATION_CLICK = "intent_extra_notification_click";
 
     public static final String ACTION_NOTIFICATION_PLAY_TRACK = "action_notification_play_track";
     public static final String ACTION_NOTIFICATION_PAUSE_TRACK = "action_notification_pause_track";
@@ -467,10 +468,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
         }
 
         // Set the notification click behavior.
-        Intent mediaPlayerIntent = new Intent(this, SearchArtistActivity.class);
-        mediaPlayerIntent.setAction(Intent.ACTION_MAIN);
-        mediaPlayerIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        PendingIntent playerPendingIntent = PendingIntent.getActivity(this, 0, mediaPlayerIntent, 0);
+        Intent mediaPlayerIntent = new Intent(this, MediaPlayerActivity.class);
+        mediaPlayerIntent.putExtra(INTENT_EXTRA_IS_MODAL, false);
+
+//        Intent mediaPlayerIntent = new Intent(this, SearchArtistActivity.class);
+//        mediaPlayerIntent.setAction(Intent.ACTION_MAIN);
+//        mediaPlayerIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+//        mediaPlayerIntent.putExtra(INTENT_EXTRA_NOTIFICATION_CLICK, true);
+
+        PendingIntent playerPendingIntent = PendingIntent.getActivity(this, 0, mediaPlayerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Build the notification.
         mNotification = new NotificationCompat.Builder(getApplicationContext())

@@ -92,8 +92,5 @@ public class SpotifyStreamerActivity extends ActionBarActivity implements
         Log.v(LOG_TAG, "===== onServiceConnected()");
 
         mMediaPlayerService = mediaPlayerService;
-
-        // Display media player from notification click.
-//        MediaPlayerService.displayMediaPlayer(getSupportFragmentManager(), false);
     }
 }
