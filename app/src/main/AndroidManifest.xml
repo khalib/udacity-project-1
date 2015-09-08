@@ -25,7 +25,7 @@
         <activity
             android:name=".TopTracksActivity"
             android:label="@string/title_activity_top_tracks"
-            android:parentActivityName=".SearchArtistActivity" >
+            android:parentActivityName=".SearchArtistActivity">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -35,6 +35,16 @@
         <activity
             android:name=".MediaPlayerActivity"
             android:label="@string/app_name">
+        </activity>
+
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/action_settings"
+            android:parentActivityName=".SearchArtistActivity"
+            android:theme="@style/SettingsTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.calebwhang.spotifystreamer.SearchArtistActivity" />
         </activity>
 
         <service android:name=".service.MediaPlayerService" />
