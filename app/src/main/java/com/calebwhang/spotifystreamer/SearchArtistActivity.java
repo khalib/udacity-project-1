@@ -1,12 +1,8 @@
 package com.calebwhang.spotifystreamer;
 
 import android.annotation.TargetApi;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Build;
-import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,10 +12,17 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 
 import com.calebwhang.spotifystreamer.service.MediaPlayerService;
+import com.calebwhang.spotifystreamer.service.MediaPlayerServiceManager;
+import com.calebwhang.spotifystreamer.service.MediaPlayerServiceConnection;
+import com.calebwhang.spotifystreamer.service.MediaPlayerServiceListenerInterface;
 
 
+/**
+ * A {@link ActionBarActivity} that presents the Artist search results.
+ */
 public class SearchArtistActivity extends ActionBarActivity implements
-        SearchArtistFragment.Callback, TopTracksFragment.Callback {
+        SearchArtistFragment.Callback, TopTracksFragment.Callback,
+        MediaPlayerServiceListenerInterface {
 
     private final String LOG_TAG = SearchArtistActivity.class.getSimpleName();
 
@@ -27,8 +30,9 @@ public class SearchArtistActivity extends ActionBarActivity implements
     private final String INSTANCE_STATE_IS_MEDIA_SERVICE_BOUND_KEY = "instance_state_is_media_service_bound";
 
     private MediaPlayerService mMediaPlayerService;
-    private boolean mIsMediaServiceBound = false;
+    private MediaPlayerServiceManager mMediaPlayerServiceManager;
     private boolean mTwoPane;
+    private Menu mMenu;
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
@@ -37,49 +41,58 @@ public class SearchArtistActivity extends ActionBarActivity implements
 
         setContentView(R.layout.activity_search_artist);
 
-        if (savedInstanceState == null) {
-            // Bind to MediaPlayerService.
-            Intent intent = new Intent(this, MediaPlayerService.class);
-            bindService(intent, mMediaPlayerConnection, Context.BIND_AUTO_CREATE);
-        } else {
-            mIsMediaServiceBound = savedInstanceState.getBoolean(INSTANCE_STATE_IS_MEDIA_SERVICE_BOUND_KEY);
-        }
-
         // Check and set if a larger screen is being used.
         if (findViewById(R.id.top_tracks_detail_container) != null) {
             mTwoPane = true;
         } else {
             mTwoPane = false;
         }
+
+        // Bind the media player service.
+        mMediaPlayerServiceManager = ((SpotifyStreamerApplication) this.getApplicationContext()).getServiceManager();
+        mMediaPlayerServiceManager.bindService(new MediaPlayerServiceConnection(this));
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        mMenu = menu;
+
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_search, menu);
-        return true;
+        getMenuInflater().inflate(R.menu.menu_search, mMenu);
+
+        // Display the "Now Playing" button if a track is playing.
+        Utility.displayCurrentTrackButton(mMediaPlayerService, mMenu);
+
+        return super.onCreateOptionsMenu(mMenu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id) {
+            case R.id.action_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                break;
+
+            case R.id.action_player:
+                mMediaPlayerService.displayMediaPlayer(getSupportFragmentManager(), mTwoPane);
+                break;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        // Save states.
-        outState.putBoolean(INSTANCE_STATE_IS_MEDIA_SERVICE_BOUND_KEY, mIsMediaServiceBound);
+    protected void onResume() {
+        super.onResume();
 
+        // Display the "Now Playing" button if a track is playing.
+        Utility.displayCurrentTrackButton(mMediaPlayerService, mMenu);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
     }
 
@@ -98,36 +111,21 @@ public class SearchArtistActivity extends ActionBarActivity implements
                     .commit();
         } else {
             // Pass the artist ID and name.
-            Intent intent = new Intent(this, TopTracksActivity.class)
-                    .putExtra(Intent.EXTRA_TEXT, artistParcelable);
-
+            Intent intent = new Intent(this, TopTracksActivity.class);
+            intent.putExtra(Intent.EXTRA_TEXT, artistParcelable);
             startActivity(intent);
         }
     }
 
     @Override
     public void onTrackSelected(ArrayList<TrackParcelable> tracks, int position) {
-        Log.v(LOG_TAG, "===== onTrackSelected()");
-
         // Play and display the track info and player controls.
         mMediaPlayerService.playAndDisplayTrack(tracks, position, getSupportFragmentManager(), mTwoPane);
     }
 
-    /**
-     * Manage MediaPlayerService connection.
-     */
-    private ServiceConnection mMediaPlayerConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MediaPlayerService.MediaPlayerServiceBinder binder = (MediaPlayerService.MediaPlayerServiceBinder) service;
-            mMediaPlayerService = binder.getService();
-            mIsMediaServiceBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mIsMediaServiceBound = false;
-        }
-    };
+    @Override
+    public void onServiceConnected(MediaPlayerService mediaPlayerService) {
+        mMediaPlayerService = mediaPlayerService;
+    }
 
 }

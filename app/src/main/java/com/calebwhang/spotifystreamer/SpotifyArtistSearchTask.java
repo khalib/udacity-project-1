@@ -2,7 +2,6 @@ package com.calebwhang.spotifystreamer;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.util.Iterator;

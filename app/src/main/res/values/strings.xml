@@ -18,4 +18,21 @@
     <string name="toast_error_no_internet">No internet connection available. Please try again later.</string>
     <string name="toast_message_implemented_stage_2">To be implemented in Stage 2</string>
     <string name="toast_error_media_player_data_load">There was an error loading the song.</string>
+
+    <!-- Preferences -->
+    <string name="preference_country_code_label">Country Code</string>
+    <string name="preference_country_code_key">country_code</string>
+    <string name="preference_country_code_default">US</string>
+
+    <string name="preference_enable_drawer_notifications_label">Drawer Notifications</string>
+    <string name="preference_enable_drawer_notifications_key">enable_drawer_notifications</string>
+    <string name="preference_enable_drawer_notifications_true">Enabled</string>
+    <string name="preference_enable_drawer_notifications_false">Not Enabled</string>
+    <string name="preference_enable_drawer_notifications_default">true</string>
+
+    <string name="preference_enable_lock_screen_notifications_label">Lock Screen Notifications</string>
+    <string name="preference_enable_lock_screen_notifications_key">enable_lock_screen_notifications</string>
+    <string name="preference_enable_lock_screen_notifications_true">Enabled</string>
+    <string name="preference_enable_lock_screen_notifications_false">Not Enabled</string>
+    <string name="preference_enable_lock_screen_notifications_default">true</string>
 </resources>

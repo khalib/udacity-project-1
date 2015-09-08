@@ -7,6 +7,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
+/**
+ * A {@link ActionBarActivity} that presents the media player controls and track information.
+ */
 public class MediaPlayerActivity extends ActionBarActivity {
 
     private final String LOG_TAG = MediaPlayerActivity.class.getSimpleName();

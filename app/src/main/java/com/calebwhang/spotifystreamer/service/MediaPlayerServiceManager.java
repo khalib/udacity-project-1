@@ -1,26 +1,30 @@
 package com.calebwhang.spotifystreamer.service;
 
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.IBinder;
 
 /**
  * Manages the life cycle of a Service and the component (Activity/Fragment) that bind to it.
  *
  * Created by caleb on 8/19/15.
  */
-public class ServiceManager {
+public class MediaPlayerServiceManager {
 
-    private final String LOG_TAG = ServiceManager.class.getSimpleName();
+    private final String LOG_TAG = MediaPlayerServiceManager.class.getSimpleName();
 
+    private MediaPlayerService mMediaPlayerService;
     private boolean mIsServiceStarted = false;
+    private boolean mIsMediaServiceBound = false;
     private Context mContext;
     private Intent mServiceIntent;
 
-    public ServiceManager(Context context, Class<?> intentClass) {
+    public MediaPlayerServiceManager(Context context) {
         mContext = context;
-        mServiceIntent = new Intent(mContext, intentClass);
+        mServiceIntent = new Intent(mContext, MediaPlayerService.class);
     }
 
     /**

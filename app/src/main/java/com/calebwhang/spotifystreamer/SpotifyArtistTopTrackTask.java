@@ -1,22 +1,15 @@
 package com.calebwhang.spotifystreamer;
 
-import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Tracks;
-import kaaes.spotify.webapi.android.models.Track;
 import retrofit.RetrofitError;
 
 /**
@@ -38,7 +31,9 @@ public class SpotifyArtistTopTrackTask extends AsyncTask<String, Void, Tracks> {
      *
      */
     public interface OnCompletionListener {
+
         void onCompletion(Tracks tracks);
+
     }
 
     @Override
@@ -51,9 +46,11 @@ public class SpotifyArtistTopTrackTask extends AsyncTask<String, Void, Tracks> {
         SpotifyService spotifyService = api.getService();
 
         try {
-            // Get the user's local.
+            // Get the user's local from the preference settings.
+            String countryCode = Utility.getCountryCodeSettings(mContext);
+
             Map<String, Object> options = new HashMap<>();
-            options.put(SpotifyService.COUNTRY, Locale.getDefault().getCountry());
+            options.put(SpotifyService.COUNTRY, countryCode);
 
             tracks = spotifyService.getArtistTopTrack(artistId, options);
         } catch (RetrofitError retrofitError) {

@@ -2,7 +2,7 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/notification_collapsed_height"
+    android:layout_height="wrap_content"
     android:background="@color/background_floating_material_dark"
     android:orientation="horizontal">
 
@@ -98,7 +98,7 @@
             android:layout_weight="1"
             android:layout_height="@dimen/notification_button_height"
             android:scaleType="fitCenter"
-            android:src="@android:drawable/ic_media_ff"
+            android:src="@android:drawable/ic_media_next"
             android:background="@color/background_floating_material_dark" />
 
         <ImageView
@@ -107,7 +107,7 @@
             android:layout_weight="1"
             android:layout_height="@dimen/notification_button_height"
             android:scaleType="fitCenter"
-            android:src="@android:drawable/ic_media_ff"
+            android:src="@android:drawable/ic_media_next"
             android:background="@color/background_floating_material_dark"
             android:alpha=".35"
             android:visibility="gone" />

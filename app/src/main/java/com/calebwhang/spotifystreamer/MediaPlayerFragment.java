@@ -1,15 +1,13 @@
 package com.calebwhang.spotifystreamer;
 
 import android.annotation.TargetApi;
-import android.content.ComponentName;
-import android.content.Context;
+import android.app.Dialog;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
@@ -26,7 +24,9 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.calebwhang.spotifystreamer.service.MediaPlayerService;
-import com.calebwhang.spotifystreamer.service.MediaPlayerService.MediaPlayerServiceBinder;
+import com.calebwhang.spotifystreamer.service.MediaPlayerServiceConnection;
+import com.calebwhang.spotifystreamer.service.MediaPlayerServiceListenerInterface;
+import com.calebwhang.spotifystreamer.service.MediaPlayerServiceManager;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
@@ -39,17 +39,16 @@ import java.util.Date;
  * displays the meta data of the track being played.
  */
 public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSeekBarChangeListener,
-        MediaPlayer.OnCompletionListener {
+        MediaPlayer.OnCompletionListener, MediaPlayerServiceListenerInterface,
+        MediaPlayerService.OnTrackChangeListener, MediaPlayerService.OnTrackPlayListener,
+        MediaPlayerService.OnTrackPauseListener, MediaPlayerService.OnTrackCompletionListener {
 
     private final String LOG_TAG = MediaPlayerFragment.class.getSimpleName();
 
-    private final String INSTANCE_STATE_IS_MEDIA_SERVICE_BOUND_KEY = "instance_state_is_media_service_bound_key";
-    private final String INSTANCE_STATE_CURRENT_TRACK_KEY = "instance_state_current_track_key";
-    private final String INSTANCE_STATE_IS_PLAYING_KEY = "instance_state_is_playing_key";
+    private final String SHARE_INTENT_TYPE = "text/plain";
     private final Integer ALBUM_COVER_IMAGE_WIDTH = 1200;
     private final Integer ALBUM_COVER_IMAGE_HEIGHT = 1200;
     private final Integer SEEK_BAR_TASK_UPDATE = 1;  // in milliseconds
-    private final String IS_MEDIA_PLAYING_KEY = "is_media_playing";
 
     // View elements.
     private TextView mArtistView;
@@ -65,11 +64,10 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     private TextView mEndTimeView;
 
     private MediaPlayerService mMediaPlayerService;
+    private MediaPlayerServiceManager mMediaPlayerServiceManager;
     private TrackParcelable mCurrentTrack;
-    private boolean mIsMediaServiceBound;
     private Handler mHandler = new Handler();
     private ShareActionProvider mShareActionProvider;
-    private String mShareText;
     private boolean mIsPlaying;
 
     public MediaPlayerFragment() {
@@ -82,14 +80,15 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState == null) {
-            // Bind to MediaPlayerService
-            Intent intent = new Intent(getActivity(), MediaPlayerService.class);
-            getActivity().bindService(intent, mMediaPlayerConnection, Context.BIND_AUTO_CREATE);
-        } else {
-            mIsMediaServiceBound = savedInstanceState.getBoolean(INSTANCE_STATE_IS_MEDIA_SERVICE_BOUND_KEY);
-            mIsPlaying = savedInstanceState.getBoolean(INSTANCE_STATE_IS_PLAYING_KEY);
-            mCurrentTrack = savedInstanceState.getParcelable(INSTANCE_STATE_CURRENT_TRACK_KEY);
+        // Bind the media player service.
+        mMediaPlayerServiceManager = ((SpotifyStreamerApplication) getActivity().getApplicationContext()).getServiceManager();
+        mMediaPlayerServiceManager.bindService(new MediaPlayerServiceConnection(this));
+
+        // Check if the fragment is to be displayed as a dialog.
+        Intent intent = getActivity().getIntent();
+        if (intent != null && intent.hasExtra(MediaPlayerService.INTENT_EXTRA_IS_MODAL)) {
+            boolean isModal = intent.getBooleanExtra(MediaPlayerService.INTENT_EXTRA_IS_MODAL, false);
+            setShowsDialog(isModal);
         }
     }
 
@@ -155,8 +154,21 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         return rootView;
     }
 
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Log.v(LOG_TAG, "===== onCreateDialog()");
+
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+//        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        return dialog;
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        Log.v(LOG_TAG, "===== onCreateOptionsMenu()");
+
         // Inflate the menu; this adds items to the action bar if it is present.
         inflater.inflate(R.menu.menu_top_tracks_fragment, menu);
 
@@ -165,30 +177,12 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
         // Get the provider and hold onto it to set/change the share intent.
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
-
-        if (mShareText != null) {
-            mShareActionProvider.setShareIntent(createShareTrackIntent());
-        }
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        // If onCreateOptionsMenu has already happened, update the share intent.
-        if (mShareActionProvider != null) {
-            mShareActionProvider.setShareIntent(createShareTrackIntent());
-        }
+        mShareActionProvider.setShareIntent(createShareTrackIntent());
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         Log.v(LOG_TAG, "===== onSaveInstanceState()");
-
-        // Store activity states.
-        outState.putBoolean(INSTANCE_STATE_IS_MEDIA_SERVICE_BOUND_KEY, mIsMediaServiceBound);
-        outState.putBoolean(INSTANCE_STATE_IS_PLAYING_KEY, mIsPlaying);
-        outState.putParcelable(INSTANCE_STATE_CURRENT_TRACK_KEY, mCurrentTrack);
 
         super.onSaveInstanceState(outState);
     }
@@ -230,11 +224,17 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
      * @return the constructed shared intent.
      */
     private Intent createShareTrackIntent() {
+        // Construct the text to be shared.
+        String shareText = String.format(getActivity().getString(R.string.format_track_share_notification),
+                mCurrentTrack.name,
+                mCurrentTrack.artist,
+                mCurrentTrack.externalSpotifyUrl);
+
         // Create the share intent.
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, mShareText);
+        shareIntent.setType(SHARE_INTENT_TYPE);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
 
         return shareIntent;
     }
@@ -445,38 +445,62 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         // Display the correct controls.
         renderControlButtons();
 
-        // Construct the text to be shared.
-        mShareText = String.format(getActivity().getString(R.string.format_track_share_notification),
-                mCurrentTrack.name,
-                mCurrentTrack.artist,
-                mCurrentTrack.externalSpotifyUrl);
+        // Update the share intent with the current track.
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(createShareTrackIntent());
+        }
     }
 
-    /**
-     * Manage MediaPlayerService connection.
-     */
-    private ServiceConnection mMediaPlayerConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.v(LOG_TAG, "===== onServiceConnected()");
+    @Override
+    public void onServiceConnected(MediaPlayerService mediaPlayerService) {
+        mMediaPlayerService = mediaPlayerService;
 
-            MediaPlayerServiceBinder binder = (MediaPlayerServiceBinder) service;
-            mMediaPlayerService = binder.getService();
-            mCurrentTrack = mMediaPlayerService.getCurrentTrack();
-            mIsPlaying = true;
-            mIsMediaServiceBound = true;
+        // Set as listener for the callback interfaces.
+        mMediaPlayerService.setOnTrackChangeListener(this);
+        mMediaPlayerService.setOnTrackPlayListener(this);
+        mMediaPlayerService.setOnTrackPauseListener(this);
+        mMediaPlayerService.setOnTrackCompletionListener(this);
 
-            // Run the track progress display updates.
-            runSeekBarUpdateTask();
+        // Get track info/state.
+        mCurrentTrack = mMediaPlayerService.getCurrentTrack();
+        mIsPlaying = mMediaPlayerService.isPlaying();
 
-            // Load the track information into the view.
-            loadTrackInfo();
-        }
+        // Run the track progress display updates.
+        runSeekBarUpdateTask();
 
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mIsMediaServiceBound = false;
-        }
-    };
+        // Load the track information into the view.
+        loadTrackInfo();
+    }
 
+    @Override
+    public void onTrackChange() {
+        Log.v(LOG_TAG, "===== onTrackChange()");
+
+        mIsPlaying = true;
+        loadTrackInfo();
+    }
+
+    @Override
+    public void onTrackPause() {
+        Log.v(LOG_TAG, "===== onTrackPause()");
+
+        mIsPlaying = false;
+        renderControlButtons();
+    }
+
+    @Override
+    public void onTrackPlay() {
+        Log.v(LOG_TAG, "===== onTrackPlay()");
+
+        mIsPlaying = true;
+        renderControlButtons();
+    }
+
+    @Override
+    public void onTrackCompletion() {
+        Log.v(LOG_TAG, "===== onTrackCompletion()");
+
+        mIsPlaying = false;
+        renderControlButtons();
+    }
 }

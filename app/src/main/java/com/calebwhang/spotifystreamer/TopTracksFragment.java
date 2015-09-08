@@ -1,10 +1,6 @@
 package com.calebwhang.spotifystreamer;
 
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -17,6 +13,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.calebwhang.spotifystreamer.service.MediaPlayerService;
+import com.calebwhang.spotifystreamer.service.MediaPlayerServiceConnection;
+import com.calebwhang.spotifystreamer.service.MediaPlayerServiceListenerInterface;
+import com.calebwhang.spotifystreamer.service.MediaPlayerServiceManager;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,15 +27,16 @@ import kaaes.spotify.webapi.android.models.Tracks;
 /**
  * Encapsulates fetching an artists top tracks and displaying it as a {@link ListView} layout.
  */
-public class TopTracksFragment extends Fragment implements SpotifyArtistTopTrackTask.OnCompletionListener {
+public class TopTracksFragment extends Fragment implements SpotifyArtistTopTrackTask.OnCompletionListener,
+        MediaPlayerServiceListenerInterface {
 
     private final String LOG_TAG = TopTracksFragment.class.getSimpleName();
 
+    private MediaPlayerServiceManager mMediaPlayerServiceManager;
+    private MediaPlayerService mMediaPlayerService;
     private ArtistParcelable mArtistParcelable;
     private ArrayList<TrackParcelable> mTopTracksList;
     private TopTracksAdapter mTopTracksAdapter;
-    private MediaPlayerService mMediaPlayerService;
-    private boolean mIsMediaServiceBound;
 
     public static final String ARTIST_TOP_TRACKS_KEY = "artist_top_tracks";
     public static final String ARTIST_PARCELABLE_KEY = "artist_parcelable";
@@ -58,11 +58,9 @@ public class TopTracksFragment extends Fragment implements SpotifyArtistTopTrack
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState == null) {
-            // Bind to MediaPlayerService
-            Intent intent = new Intent(getActivity(), MediaPlayerService.class);
-            getActivity().bindService(intent, mMediaPlayerConnection, Context.BIND_AUTO_CREATE);
-        }
+        // Bind the media player service.
+        mMediaPlayerServiceManager = ((SpotifyStreamerApplication) getActivity().getApplicationContext()).getServiceManager();
+        mMediaPlayerServiceManager.bindService(new MediaPlayerServiceConnection(this));
     }
 
     @Override
@@ -147,8 +145,12 @@ public class TopTracksFragment extends Fragment implements SpotifyArtistTopTrack
             // Load track list.
             // Note: mTopTracksList is updated by reference by the adapter.
             mMediaPlayerService.setTrackList(mTopTracksList);
-            mMediaPlayerService.setTrack(0);
         }
+    }
+
+    @Override
+    public void onServiceConnected(MediaPlayerService mediaPlayerService) {
+        mMediaPlayerService = mediaPlayerService;
     }
 
     /**
@@ -160,20 +162,4 @@ public class TopTracksFragment extends Fragment implements SpotifyArtistTopTrack
         spotifyArtistTopTrackTask.execute(mArtistParcelable.id);
     }
 
-    /**
-     * Manage MediaPlayerService connection.
-     */
-    private ServiceConnection mMediaPlayerConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MediaPlayerService.MediaPlayerServiceBinder binder = (MediaPlayerService.MediaPlayerServiceBinder) service;
-            mMediaPlayerService = binder.getService();
-            mIsMediaServiceBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mIsMediaServiceBound = false;
-        }
-    };
 }
