@@ -21,19 +21,28 @@ public class SpotifyArtistTopTrackTask extends AsyncTask<String, Void, Tracks> {
 
     private final Context mContext;
     private Exception exception;
-    private OnCompletionListener mCompletionListener;
+    private OnPostExecute mOnPostExecute;
 
     public SpotifyArtistTopTrackTask(Context context) {
         this.mContext = context;
     }
 
     /**
-     * Interface definition for a callback to be invoked when playback of a media source has completed.
+     * Interface definition for a callback to be invoked when search task is completed.
      */
-    public interface OnCompletionListener {
+    public interface OnPostExecute {
 
-        void onCompletion(Tracks tracks);
+        void onPostExecute(Tracks tracks);
 
+    }
+
+    /**
+     * Register a callback to be invoked when the Spotify API call is completed.
+     *
+     * @param listener the callback that will be run.
+     */
+    public void setOnPostExecute(OnPostExecute listener) {
+        mOnPostExecute = listener;
     }
 
     @Override
@@ -67,22 +76,16 @@ public class SpotifyArtistTopTrackTask extends AsyncTask<String, Void, Tracks> {
         if (exception != null) {
             Toast.makeText(mContext, R.string.toast_error_no_internet, Toast.LENGTH_LONG).show();
         } else if (tracks != null) {
-            mCompletionListener.onCompletion(tracks);
+            // Invoke callback.
+            if (mOnPostExecute != null) {
+                mOnPostExecute.onPostExecute(tracks);
+            }
 
             if (tracks.tracks.size() == 0) {
                 // Display error message for empty results.
                 Toast.makeText(mContext, R.string.toast_error_no_artist_top_songs, Toast.LENGTH_SHORT).show();
             }
         }
-    }
-
-    /**
-     * Register a callback to be invoked when call to the Spotify API is complete.
-     *
-     * @param completionListener the callback that will be run
-     */
-    public void setOnCompletionListener(OnCompletionListener completionListener) {
-        mCompletionListener = completionListener;
     }
 
 }

@@ -2,22 +2,29 @@ package com.calebwhang.spotifystreamer;
 
 import android.annotation.TargetApi;
 import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+
+import kaaes.spotify.webapi.android.models.Artist;
+import kaaes.spotify.webapi.android.models.ArtistsPager;
 
 /**
  * Encapsulates fetching artist search rersults and displaying it as a {@link ListView} layout.
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class SearchArtistFragment extends Fragment {
+public class SearchArtistFragment extends Fragment implements SpotifyArtistSearchTask.OnPostExecute {
 
     private final String LOG_TAG = SearchArtistFragment.class.getSimpleName();
 
@@ -25,11 +32,16 @@ public class SearchArtistFragment extends Fragment {
     private static final String ARTIST_SEARCH_RESULTS_KEY = "artist_search_results";
     private static final String ARTIST_SEARCH_TEXT_KEY = "artist_search_text";
 
+    private final Integer ARTIST_IMAGE_LARGE = 0;
+    private final Integer ARTIST_IMAGE_MEDIUM = 1;
+    private final Integer ARTIST_IMAGE_SMALL = 2;
+
     private String mSearchText;
     private View mRootView;
     private ListView mListView;
     private SearchArtistAdapter mSearchArtistAdapter;
     private ArrayList<ArtistParcelable> mArtistSearchResults;
+    private ProgressDialog mProgressDialog;
 
     public SearchArtistFragment() {}
 
@@ -91,6 +103,8 @@ public class SearchArtistFragment extends Fragment {
             public boolean onQueryTextChange(String s) {
                 // Assign the search string and perform the search.
                 if (!mSearchText.equals(s.toString())) {
+                    mProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.progress_dialog_searching));
+
                     mSearchText = s.toString();
                     getArtistSearchResults();
                 }
@@ -111,11 +125,45 @@ public class SearchArtistFragment extends Fragment {
         super.onSaveInstanceState(outState);
     }
 
+    @Override
+    public void onPostExecute(ArtistsPager artistsPager) {
+        if (artistsPager != null) {
+            if (artistsPager.artists.items.size() > 0) {
+                mSearchArtistAdapter.clear();
+
+                // Update the artist search results.
+                for (Iterator<Artist> i = artistsPager.artists.items.iterator(); i.hasNext();) {
+                    Artist artist = i.next();
+
+                    // Assign image to artist.
+                    String artistImage = null;
+                    if (artist.images.size() > 0) {
+                        artistImage = artist.images.get(ARTIST_IMAGE_MEDIUM).url;
+                    }
+
+                    // Load the data into the parcelable object.
+                    ArtistParcelable artistParcelable = new ArtistParcelable(artist.id, artist.name, artistImage);
+                    mSearchArtistAdapter.add(artistParcelable);
+                }
+            } else {
+                // Display message for empty results.
+                Toast.makeText(getActivity(), R.string.toast_error_no_artist_found, Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        mProgressDialog.dismiss();
+    }
+
     /**
      * Fetches artist search results from the Spotify API.
      */
     private void getArtistSearchResults() {
         SpotifyArtistSearchTask spotifyArtistSearchTask = new SpotifyArtistSearchTask(getActivity(), mSearchArtistAdapter);
+
+        // Set as task listener.
+        spotifyArtistSearchTask.setOnPostExecute(this);
+
+        // Run the task.
         spotifyArtistSearchTask.execute(mSearchText);
     }
 

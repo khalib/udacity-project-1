@@ -1,5 +1,6 @@
 package com.calebwhang.spotifystreamer;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -27,7 +28,7 @@ import kaaes.spotify.webapi.android.models.Tracks;
 /**
  * Encapsulates fetching an artists top tracks and displaying it as a {@link ListView} layout.
  */
-public class TopTracksFragment extends Fragment implements SpotifyArtistTopTrackTask.OnCompletionListener,
+public class TopTracksFragment extends Fragment implements SpotifyArtistTopTrackTask.OnPostExecute,
         MediaPlayerServiceListenerInterface {
 
     private final String LOG_TAG = TopTracksFragment.class.getSimpleName();
@@ -37,6 +38,7 @@ public class TopTracksFragment extends Fragment implements SpotifyArtistTopTrack
     private ArtistParcelable mArtistParcelable;
     private ArrayList<TrackParcelable> mTopTracksList;
     private TopTracksAdapter mTopTracksAdapter;
+    private ProgressDialog mProgressDialog;
 
     public static final String ARTIST_TOP_TRACKS_KEY = "artist_top_tracks";
     public static final String ARTIST_PARCELABLE_KEY = "artist_parcelable";
@@ -129,7 +131,7 @@ public class TopTracksFragment extends Fragment implements SpotifyArtistTopTrack
      * @param tracks a list of top tracks.
      */
     @Override
-    public void onCompletion(Tracks tracks) {
+    public void onPostExecute(Tracks tracks) {
         if (tracks.tracks.size() > 0) {
             mTopTracksAdapter.clear();
 
@@ -146,6 +148,8 @@ public class TopTracksFragment extends Fragment implements SpotifyArtistTopTrack
             // Note: mTopTracksList is updated by reference by the adapter.
             mMediaPlayerService.setTrackList(mTopTracksList);
         }
+
+        mProgressDialog.dismiss();
     }
 
     @Override
@@ -157,8 +161,14 @@ public class TopTracksFragment extends Fragment implements SpotifyArtistTopTrack
      * Fetches Top Tracks list of a given artist from the Spotify API.
      */
     private void getTopTracksList() {
+        mProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.progress_dialog_loading));
+
         SpotifyArtistTopTrackTask spotifyArtistTopTrackTask = new SpotifyArtistTopTrackTask(getActivity());
-        spotifyArtistTopTrackTask.setOnCompletionListener(this);
+
+        // Set as task listener.
+        spotifyArtistTopTrackTask.setOnPostExecute(this);
+
+        // Run the task.
         spotifyArtistTopTrackTask.execute(mArtistParcelable.id);
     }
 

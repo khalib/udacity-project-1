@@ -2,6 +2,7 @@ package com.calebwhang.spotifystreamer;
 
 import android.annotation.TargetApi;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Build;
@@ -73,6 +74,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     private Handler mHandler = new Handler();
     private ShareActionProvider mShareActionProvider;
     private boolean mIsModal = true;
+    private ProgressDialog mProgressDialog;
 
     public MediaPlayerFragment() {
 
@@ -161,6 +163,8 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
                 startActivity(shareIntent);
             }
         });
+
+        mProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.progress_dialog_loading));
 
         return rootView;
     }
@@ -505,5 +509,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     @Override
     public void onTrackPrepared() {
         renderControlButtons();
+        mProgressDialog.dismiss();
     }
 }

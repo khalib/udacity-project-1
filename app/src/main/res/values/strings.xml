@@ -36,4 +36,8 @@
     <string name="preference_enable_player_notifications_false">Not Enabled</string>
     <string name="preference_enable_player_notifications_default">true</string>
 
+    <!-- Progress Dialog -->
+    <string name="progress_dialog_searching">Searching...</string>
+    <string name="progress_dialog_loading">Loading...</string>
+
 </resources>
