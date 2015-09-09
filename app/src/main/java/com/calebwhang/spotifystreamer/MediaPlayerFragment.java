@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.NavUtils;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
@@ -185,6 +186,28 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         // Get the provider and hold onto it to set/change the share intent.
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
         mShareActionProvider.setShareIntent(createShareTrackIntent());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // Back up to where search was left off.
+                Intent intent = NavUtils.getParentActivityIntent(getActivity());
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                NavUtils.navigateUpTo(getActivity(), intent);
+                return true;
+
+            case R.id.action_settings:
+                startActivity(new Intent(getActivity(), SettingsActivity.class));
+                return true;
+
+            case R.id.action_player:
+                MediaPlayerService.displayMediaPlayer(getFragmentManager(), mIsModal);
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

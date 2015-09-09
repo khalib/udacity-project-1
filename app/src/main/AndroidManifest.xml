@@ -41,11 +41,7 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/action_settings"
-            android:parentActivityName=".SearchArtistActivity"
             android:theme="@style/SettingsTheme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.calebwhang.spotifystreamer.SearchArtistActivity" />
         </activity>
 
         <service android:name=".service.MediaPlayerService" />
