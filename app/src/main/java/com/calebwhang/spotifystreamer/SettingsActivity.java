@@ -7,6 +7,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+
 /**
  * A {@link PreferenceActivity} that presents the user settings options.
  */
@@ -22,9 +23,12 @@ public class SettingsActivity extends PreferenceActivity
         // Add general preferences, defined in the XML file.
         addPreferencesFromResource(R.xml.preference_general);
 
-        // For all preferences, attach an OnPreferenceChangeListener so the UI summary can be
-        // updated when the preference changes.
-        bindPreferenceSummaryToValue(findPreference(getString(R.string.preference_country_code_key)));
+        // Set the default country code preference summary.
+        ListPreference countryCodePreference = (ListPreference) findPreference(getString(R.string.preference_country_code_key));
+        countryCodePreference.setSummary(Utility.getCountryCodeSettings(getApplicationContext()));
+
+        // Attach an OnPreferenceChangeListener so the UI summary can be updated when the preference changes.
+        bindPreferenceSummaryToValue(countryCodePreference);
     }
 
     @Override

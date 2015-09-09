@@ -1,6 +1,5 @@
 package com.calebwhang.spotifystreamer;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -10,6 +9,9 @@ import android.view.MenuItem;
 
 import com.calebwhang.spotifystreamer.service.MediaPlayerService;
 
+import java.util.Locale;
+import java.util.TreeMap;
+
 /**
  * Utility helper methods.
  */
@@ -18,7 +20,7 @@ public class Utility {
     private final static String LOG_TAG = Utility.class.getSimpleName();
 
     /**
-     * Gets the preference settings for country code.
+     * Gets the preference settings for country code which defaults to the device's locale.
      *
      * @param context
      * @return
@@ -26,9 +28,8 @@ public class Utility {
     public static String getCountryCodeSettings(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String key = context.getString(R.string.preference_country_code_key);
-        String defaultValue = context.getString(R.string.preference_country_code_default);
 
-        return preferences.getString(key, defaultValue);
+        return preferences.getString(key, Locale.getDefault().getCountry());
     }
 
     /**
@@ -79,6 +80,25 @@ public class Utility {
                 menuItem.setVisible(false);
             }
         }
+    }
+
+    /**
+     * Get a Map of available locales with the redundancy removed and sorted by country name.
+     *
+     * @return
+     */
+    public static TreeMap getLocales() {
+        Locale[] locales = Locale.getAvailableLocales();
+        TreeMap<String, Locale> countries = new TreeMap<>();
+
+        for (Locale locale : locales) {
+            String country = locale.getDisplayCountry();
+            if (country.trim().length() > 0 && !countries.containsKey(country)) {
+                countries.put(locale.getDisplayCountry(), locale);
+            }
+        }
+
+        return countries;
     }
 
 }
