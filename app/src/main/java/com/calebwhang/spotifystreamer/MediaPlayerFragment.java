@@ -489,6 +489,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     @Override
     public void onTrackChange() {
         loadTrackInfo();
+        mProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.progress_dialog_loading));
     }
 
     @Override
