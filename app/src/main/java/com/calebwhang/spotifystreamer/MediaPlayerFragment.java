@@ -18,6 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -63,12 +64,14 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     private SeekBar mMediaSeekBar;
     private TextView mCurrentTimeView;
     private TextView mEndTimeView;
+    private ImageButton mShareButton;
 
     private MediaPlayerService mMediaPlayerService;
     private MediaPlayerServiceManager mMediaPlayerServiceManager;
     private TrackParcelable mCurrentTrack;
     private Handler mHandler = new Handler();
     private ShareActionProvider mShareActionProvider;
+    private boolean mIsModal = true;
 
     public MediaPlayerFragment() {
 
@@ -87,8 +90,8 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         // Check if the fragment is to be displayed as a dialog.
         Intent intent = getActivity().getIntent();
         if (intent != null && intent.hasExtra(MediaPlayerService.INTENT_EXTRA_IS_MODAL)) {
-            boolean isModal = intent.getBooleanExtra(MediaPlayerService.INTENT_EXTRA_IS_MODAL, false);
-            setShowsDialog(isModal);
+            mIsModal = intent.getBooleanExtra(MediaPlayerService.INTENT_EXTRA_IS_MODAL, false);
+            setShowsDialog(mIsModal);
         }
     }
 
@@ -111,12 +114,19 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         mMediaSeekBar = (SeekBar) rootView.findViewById(R.id.track_media_seekbar);
         mCurrentTimeView = (TextView) rootView.findViewById(R.id.track_current_time_textview);
         mEndTimeView = (TextView) rootView.findViewById(R.id.track_end_time_textview);
+        mShareButton = (ImageButton) rootView.findViewById(R.id.track_share_imagebutton);
 
         // Set listeners.
         mMediaSeekBar.setOnSeekBarChangeListener(this);
 
-        // Enable the menu.
-        setHasOptionsMenu(true);
+        // Modal specific view settings.
+        if (mIsModal == true) {
+            // Display share button.
+            mShareButton.setVisibility(View.VISIBLE);
+        } else {
+            // Display the menu.
+            setHasOptionsMenu(true);
+        }
 
         // Set button click handlers.
         mPreviousTrackButton.setOnClickListener(new View.OnClickListener() {
@@ -151,6 +161,15 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
             }
         });
 
+        mShareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v(LOG_TAG, "SHARE TAPPED");
+                Intent shareIntent = createShareTrackIntent();
+                startActivity(shareIntent);
+            }
+        });
+
         return rootView;
     }
 
@@ -160,7 +179,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         Log.v(LOG_TAG, "===== onCreateDialog()");
 
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-//        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         return dialog;
     }
@@ -177,7 +196,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
         // Get the provider and hold onto it to set/change the share intent.
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
-//        mShareActionProvider.setShareIntent(createShareTrackIntent());
+        mShareActionProvider.setShareIntent(createShareTrackIntent());
     }
 
     @Override
