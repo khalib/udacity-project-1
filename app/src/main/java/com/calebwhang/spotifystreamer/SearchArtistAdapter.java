@@ -15,8 +15,6 @@ import java.util.ArrayList;
 /**
  * {@link SearchArtistAdapter} exposes a list of artist search results
  * to a {@link android.widget.ListView}.
- *
- * Created by caleb on 7/11/15.
  */
 public class SearchArtistAdapter extends ArrayAdapter<ArtistParcelable> {
 

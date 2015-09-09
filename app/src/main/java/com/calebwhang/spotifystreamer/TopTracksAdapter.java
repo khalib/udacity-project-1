@@ -16,8 +16,6 @@ import java.util.ArrayList;
 /**
  * {@link TopTracksAdapter} exposes a list of artist top tracks
  * to a {@link android.widget.ListView}.
- *
- * Created by caleb on 7/13/15.
  */
 public class TopTracksAdapter extends ArrayAdapter<TrackParcelable> {
 

@@ -10,7 +10,7 @@ import kaaes.spotify.webapi.android.models.ArtistSimple;
 import kaaes.spotify.webapi.android.models.Track;
 
 /**
- * Created by caleb on 7/20/15.
+ * Implements {@link Parcelable} to store track data.
  */
 public class TrackParcelable implements Parcelable {
 

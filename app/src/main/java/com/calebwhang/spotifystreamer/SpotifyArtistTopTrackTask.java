@@ -28,7 +28,7 @@ public class SpotifyArtistTopTrackTask extends AsyncTask<String, Void, Tracks> {
     }
 
     /**
-     *
+     * Interface definition for a callback to be invoked when playback of a media source has completed.
      */
     public interface OnCompletionListener {
 

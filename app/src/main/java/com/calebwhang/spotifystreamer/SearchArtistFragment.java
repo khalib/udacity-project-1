@@ -119,15 +119,4 @@ public class SearchArtistFragment extends Fragment {
         spotifyArtistSearchTask.execute(mSearchText);
     }
 
-    /**
-     * FOR TESTING FOR TESTING FOR TESTING FOR TESTING FOR TESTING FOR TESTING FOR TESTING
-     * @param savedInstanceState
-     */
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        mSearchText = "foo";
-        getArtistSearchResults();
-    }
 }

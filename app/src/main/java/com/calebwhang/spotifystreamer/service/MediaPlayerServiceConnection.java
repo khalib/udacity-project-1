@@ -9,14 +9,13 @@ import com.calebwhang.spotifystreamer.service.MediaPlayerService.MediaPlayerServ
 
 /**
  * Interface for handling the state of the MediaPlayerService at the application level.
- *
- * Created by caleb on 8/19/15.
  */
 public class MediaPlayerServiceConnection implements ServiceConnection {
 
     private final String LOG_TAG = MediaPlayerServiceConnection.class.getSimpleName();
 
     private MediaPlayerService mMediaPlayerService;
+    private boolean mIsMediaPlayerServiceBound = false;
 
     // This is the object that receives interactions from service.
     private MediaPlayerServiceListenerInterface mListener;
@@ -27,16 +26,19 @@ public class MediaPlayerServiceConnection implements ServiceConnection {
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        Log.v(LOG_TAG, "MediaPlayerService Connected");
-
         MediaPlayerServiceBinder binder = (MediaPlayerServiceBinder) service;
         mMediaPlayerService = binder.getService();
-        mListener.onServiceConnected(mMediaPlayerService);
+        mIsMediaPlayerServiceBound = true;
+
+        // Invoke callback.
+        if (mListener != null) {
+            mListener.onServiceConnected(mMediaPlayerService);
+        }
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-        Log.v(LOG_TAG, "MediaPlayerService Disconnected");
+        mIsMediaPlayerServiceBound = false;
     }
 
     /**
@@ -44,7 +46,7 @@ public class MediaPlayerServiceConnection implements ServiceConnection {
      * activity. This will be forwarded to the Service and *must* be called
      * before onBind() in this case.
      *
-     * @param listener
+     * @param listener the callback that will be run.
      */
     public void setServiceListener(MediaPlayerServiceListenerInterface listener)
     {

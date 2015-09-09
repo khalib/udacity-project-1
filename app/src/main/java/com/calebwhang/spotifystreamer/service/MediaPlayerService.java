@@ -41,11 +41,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
 
     public static final String INTENT_EXTRA_IS_MODAL = "intent_extra_is_modal";
     public static final String INTENT_EXTRA_NOTIFICATION_CLICK = "intent_extra_notification_click";
-
     public static final String ACTION_NOTIFICATION_PLAY_TRACK = "action_notification_play_track";
     public static final String ACTION_NOTIFICATION_PAUSE_TRACK = "action_notification_pause_track";
     public static final String ACTION_NOTIFICATION_NEXT_TRACK = "action_notification_next_track";
     public static final String ACTION_NOTIFICATION_PREVIOUS_TRACK = "action_notification_previous_track";
+    public static final String FRAGMENT_MODAL_DIALOG_TAG = "fragment_modal_dialog_tag";
 
     public static final int NOTIFICATION_NOW_PLAYING_VIEW_TYPE_COLLAPSED = 1;
     public static final int NOTIFICATION_NOW_PLAYING_VIEW_TYPE_EXPANDED = 2;
@@ -125,14 +125,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
 
     @Override
     public void onCreate() {
-        Log.v(LOG_TAG, "===== onCreate()");
-
         super.onCreate();
 
         // Initialize service.
         if (mMediaPlayer == null) {
-            Log.v(LOG_TAG, "MediaPlayerService Initilized.");
-
             // Configure the media player.
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
@@ -147,15 +143,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.v(LOG_TAG, "===== onBind()");
-
         return mMediaPlayerBinder;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.v(LOG_TAG, "===== onUnbind()");
-
         mMediaPlayer.stop();
         mMediaPlayer.release();
 
@@ -176,15 +168,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        Log.v(LOG_TAG, "===== onError() ERROR ERROR ERROR");
-
         return false;
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        Log.v(LOG_TAG, "===== onPrepared()");
-
         mp.start();
         showNotification();
 
@@ -197,31 +185,21 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     /**
      * Handles the incoming intents from the notification media controller.
      *
-     * @param intent
+     * @param intent the incoming intent.
      */
     private void handleIntent(Intent intent) {
-        Log.v(LOG_TAG, "===== handleIntent()");
-
         if (intent != null && intent.getAction() != null) {
             if (intent.getAction().equalsIgnoreCase(ACTION_NOTIFICATION_PLAY_TRACK)) {
-                Log.v(LOG_TAG, "===== Notification PLAY Tapped");
-
                 // Play track actions.
                 playTrack(true);
             } else if (intent.getAction().equalsIgnoreCase(ACTION_NOTIFICATION_PAUSE_TRACK)) {
-                Log.v(LOG_TAG, "===== Notification PAUSE Tapped");
-
                 // Pause track actions.
                 pauseTrack();
             } else if(intent.getAction().equalsIgnoreCase(ACTION_NOTIFICATION_NEXT_TRACK)) {
-                Log.v(LOG_TAG, "===== Notification NEXT Tapped");
-
                 // Next track actions.
                 playNextTrack();
 
             } else if(intent.getAction().equalsIgnoreCase(ACTION_NOTIFICATION_PREVIOUS_TRACK)) {
-                Log.v(LOG_TAG, "===== Notification PREVIOUS Tapped");
-
                 // Previous track actions.
                 playPreviousTrack();
             }
@@ -236,8 +214,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * @param tracks a list of TrackParcelable objects.
      */
     public void setTrackList(ArrayList<TrackParcelable> tracks) {
-        Log.v(LOG_TAG, "===== setTrackList()");
-
         mTracks = tracks;
     }
 
@@ -247,8 +223,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * @param trackPosition the track index of the track list.
      */
     public void setTrack(int trackPosition) {
-        Log.v(LOG_TAG, "===== setTrack()");
-
         mCurrentTrackPosition = trackPosition;
         mCurrentTrack = mTracks.get(mCurrentTrackPosition);
     }
@@ -257,8 +231,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * Gets the current track being played.
      */
     public TrackParcelable getCurrentTrack() {
-        Log.v(LOG_TAG, "===== getCurrentTrack()");
-
         return mCurrentTrack;
     }
 
@@ -266,8 +238,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * Overloads the playTrack() method with the default state of the resume parameter.
      */
     public void playTrack() {
-        Log.v(LOG_TAG, "===== playTrack()");
-
         playTrack(false);
     }
 
@@ -277,14 +247,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * @param resume whether or not a track is to be resumed or started from the beginning.
      */
     public void playTrack(boolean resume) {
-        Log.v(LOG_TAG, "===== playTrack(PARAM)");
-
         if (!resume) {
             // Start track from the beginning.
             loadAndStartTrack();
         } else {
-            Log.v(LOG_TAG, "Resuming playback.");
-
             // Resuming from a paused state.
             mMediaPlayer.start();
             updateNotifications();
@@ -300,8 +266,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * Loads the track from the remote source to be played.
      */
     public void loadAndStartTrack() {
-        Log.v(LOG_TAG, "===== loadAndStartTrack()");
-
         // Playing the selected track for the first time.
         mMediaPlayer.reset();
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -310,7 +274,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
             // Load the track.
             mMediaPlayer.setDataSource(mCurrentTrack.previewUrl);
         } catch (Exception e) {
-            Log.v(LOG_TAG, "Error playing song.", e);
             Toast.makeText(this, R.string.toast_error_media_player_data_load, Toast.LENGTH_LONG).show();
         }
 
@@ -321,8 +284,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * Pauses the currently playing track
      */
     public void pauseTrack() {
-        Log.v(LOG_TAG, "===== pauseTrack()");
-
         mMediaPlayer.pause();
         updateNotifications();
 
@@ -336,8 +297,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * Plays the previous track in the track list if one exitst.
      */
     public void playPreviousTrack() {
-        Log.v(LOG_TAG, "===== playPreviousTrack()");
-
         if (hasPreviousTrack()) {
             setTrack(mCurrentTrackPosition - 1);
 
@@ -354,8 +313,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * Plays the previous track in the track list if one exitst.
      */
     public void playNextTrack() {
-        Log.v(LOG_TAG, "===== playNextTrack()");
-
         if (hasNextTrack()) {
             setTrack(mCurrentTrackPosition + 1);
 
@@ -420,16 +377,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * @param isModal
      */
     public static void displayMediaPlayer(FragmentManager fragmentManager, boolean isModal) {
-        Log.v(LOG_TAG, "===== displayMediaPlayer()");
-
         MediaPlayerFragment mediaPlayerFragment = new MediaPlayerFragment();
 
         if (isModal) {
             // The device is using a large layout, so show the fragment as a dialog
-            mediaPlayerFragment.show(fragmentManager, "dialog");
+            mediaPlayerFragment.show(fragmentManager, FRAGMENT_MODAL_DIALOG_TAG);
         } else {
-            Log.v(LOG_TAG, "===== getShowsDialog(): " + Boolean.toString(mediaPlayerFragment.getShowsDialog()));
-
             Context appContext = SpotifyStreamerApplication.getStaticApplicationContext();
             Intent mediaPlayerIntent = new Intent(appContext, MediaPlayerActivity.class);
             mediaPlayerIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -447,8 +400,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * @param isModal whether the media player controls are to be displayed as a modal or a full screen.
      */
     public void playAndDisplayTrack(ArrayList<TrackParcelable> tracks, int position, FragmentManager fragmentManager, boolean isModal) {
-        Log.v(LOG_TAG, "===== playAndDisplayTrack()");
-
         // Play the track via the service.
         setTrackList(tracks);
         setTrack(position);
@@ -458,14 +409,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
         displayMediaPlayer(fragmentManager, isModal);
     }
 
-
     /**
      * Shows the meta data of the current track that is playing in the notification drawer.
      */
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public void showNotification() {
-        Log.v(LOG_TAG, "===== showNotification()");
-
         // Set visibility according to the user preference.
         if (Utility.getPlayerNotificationSettings(getApplicationContext()) == true) {
             // Set the notification click behavior.
@@ -503,8 +451,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * Updates the notification states and metadata displayed.
      */
     public void updateNotifications() {
-        Log.v(LOG_TAG, "===== updateNotifications()");
-
         renderControlButtons(mNotificationContentView);
         renderControlButtons(mNotificationBigContentView);
         mNotificationManager.notify(NOTIFICATION_CURRENT_TRACK_ID, mNotification);
@@ -518,8 +464,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * @return the constructed remote view.h
      */
     private RemoteViews getRemoteView(int viewType, Notification notification) {
-        Log.v(LOG_TAG, "===== getRemoteView(): " + Integer.toString(viewType));
-
         int layout = 0;
 
         // Load the layout from the type.
@@ -574,8 +518,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
      * @param remoteViews the remote view to change the button states.
      */
     private void renderControlButtons(RemoteViews remoteViews) {
-        Log.v(LOG_TAG, "===== renderControlButtons()");
-
         // The previous track button state.
         if (hasPreviousTrack()) {
             remoteViews.setInt(R.id.notification_previous_imagebutton, "setVisibility", View.VISIBLE);

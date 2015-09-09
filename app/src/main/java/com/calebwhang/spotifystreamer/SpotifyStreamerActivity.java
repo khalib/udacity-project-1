@@ -42,8 +42,6 @@ public class SpotifyStreamerActivity extends ActionBarActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        Log.v(LOG_TAG, "===== onCreateOptionsMenu()");
-
         super.onCreateOptionsMenu(menu);
 
         mMenu = menu;
@@ -89,8 +87,6 @@ public class SpotifyStreamerActivity extends ActionBarActivity implements
 
     @Override
     public void onServiceConnected(MediaPlayerService mediaPlayerService) {
-        Log.v(LOG_TAG, "===== onServiceConnected()");
-
         mMediaPlayerService = mediaPlayerService;
     }
 }

@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Created by caleb on 7/15/15.
+ * Implements {@link Parcelable} to store artists data.
  */
 public class ArtistParcelable implements Parcelable {
 

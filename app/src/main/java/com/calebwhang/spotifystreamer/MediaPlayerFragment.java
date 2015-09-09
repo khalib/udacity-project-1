@@ -79,8 +79,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.v(LOG_TAG, "===== onCreate()");
-
         super.onCreate(savedInstanceState);
 
         // Bind the media player service.
@@ -98,8 +96,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.v(LOG_TAG, "===== onCreateView()");
-
         View rootView = inflater.inflate(R.layout.fragment_media_player, container, false);
 
         // Load view elements.
@@ -132,7 +128,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         mPreviousTrackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.v(LOG_TAG, "PREVIOUS TAPPED");
                 playPreviousTrack();
             }
         });
@@ -140,7 +135,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         mNextTrackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.v(LOG_TAG, "NEXT TAPPED");
                 playNextTrack();
             }
         });
@@ -148,7 +142,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         mPlayTrackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.v(LOG_TAG, "PLAY TAPPED");
                 startPlayback();
             }
         });
@@ -156,7 +149,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         mPausePlaybackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.v(LOG_TAG, "PAUSE TAPPED");
                 pausePlayback();
             }
         });
@@ -164,7 +156,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         mShareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.v(LOG_TAG, "SHARE TAPPED");
                 Intent shareIntent = createShareTrackIntent();
                 startActivity(shareIntent);
             }
@@ -176,8 +167,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Log.v(LOG_TAG, "===== onCreateDialog()");
-
+        // Overide the modal dialog settings.
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
@@ -186,8 +176,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        Log.v(LOG_TAG, "===== onCreateOptionsMenu()");
-
         // Inflate the menu; this adds items to the action bar if it is present.
         inflater.inflate(R.menu.menu_media_player_fragment, menu);
 
@@ -209,23 +197,17 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-        Log.v(LOG_TAG, "===== onStartTrackingTouch()");
-
         stopSeekBarUpdateTask();
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        Log.v(LOG_TAG, "===== onStopTrackingTouch()");
-
         // Play the track from where the user slid the seek bar from.
         updateSeekBar(true);
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        Log.v(LOG_TAG, "===== onCompletion()");
-
         renderControlButtons();
     }
 
@@ -263,17 +245,17 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     }
 
     /**
-     * Gets the Progress percentage
+     * Helper method that gets the Progress percentage.
      *
-     * @param currentDuration
-     * @param totalDuration
+     * @param currentDuration the amount of the track played in milliseconds.
+     * @param totalDuration the total duration of the track in milliseconds.
      * */
     public int getProgressPercentage(long currentDuration, long totalDuration){
         Double percentage;
         long currentSeconds = (int) (currentDuration / 1000);
         long totalSeconds = (int) (totalDuration / 1000);
 
-        // Calculating percentage
+        // Calculating percentage.
         percentage =(((double)currentSeconds) / totalSeconds) * 100;
 
         return percentage.intValue();
@@ -479,36 +461,26 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
     @Override
     public void onTrackChange() {
-        Log.v(LOG_TAG, "===== onTrackChange()");
-
         loadTrackInfo();
     }
 
     @Override
     public void onTrackPause() {
-        Log.v(LOG_TAG, "===== onTrackPause()");
-
         renderControlButtons();
     }
 
     @Override
     public void onTrackPlay() {
-        Log.v(LOG_TAG, "===== onTrackPlay()");
-
         renderControlButtons();
     }
 
     @Override
     public void onTrackCompletion() {
-        Log.v(LOG_TAG, "===== onTrackCompletion()");
-
         renderControlButtons();
     }
 
     @Override
     public void onTrackPrepared() {
-        Log.v(LOG_TAG, "===== onTrackPrepared()");
-
         renderControlButtons();
     }
 }

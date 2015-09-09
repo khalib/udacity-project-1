@@ -22,8 +22,6 @@ public class SpotifyStreamerApplication extends Application {
 
     @Override
     public void onCreate() {
-        Log.v(LOG_TAG, "===== onCreate()");
-
         super.onCreate();
 
         // Set context for static calls.
@@ -39,8 +37,6 @@ public class SpotifyStreamerApplication extends Application {
      * @return the application service manager
      */
     public MediaPlayerServiceManager getServiceManager() {
-        Log.v(LOG_TAG, "===== getServiceManager()");
-
         return mMediaPlayerServiceManager;
     }
 

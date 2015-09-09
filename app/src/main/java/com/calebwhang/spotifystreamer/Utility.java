@@ -22,8 +22,8 @@ public class Utility {
     /**
      * Gets the preference settings for country code which defaults to the device's locale.
      *
-     * @param context
-     * @return
+     * @param context the context of the preferences whose values are wanted.
+     * @return the country code set in the user preferences.
      */
     public static String getCountryCodeSettings(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -35,8 +35,8 @@ public class Utility {
     /**
      * Gets the preference settings for the drawer notifications.
      *
-     * @param context
-     * @return
+     * @param context the context of the preferences whose values are wanted.
+     * @return whether notifications are set in the user preferences.
      */
     public static boolean getPlayerNotificationSettings(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -50,12 +50,10 @@ public class Utility {
      * Helper method that displays the "Now Playing" button in the action bar if there is a track
      * and playlist that has been selected.
      *
-     * @param mediaPlayerService
-     * @param menu
+     * @param mediaPlayerService the bound instance of the media player service.
+     * @param menu the menu that is to be modified.
      */
     public static void displayCurrentTrackButton(MediaPlayerService mediaPlayerService, Menu menu) {
-        Log.v(LOG_TAG, "===== displayCurrentTrackButton()");
-
         // Display the "Now Playing" button if a track is playing.
         if (mediaPlayerService != null && menu != null) {
             MenuItem menuItem = menu.findItem(R.id.action_player);
@@ -71,7 +69,7 @@ public class Utility {
     /**
      * Get a Map of available locales with the redundancy removed and sorted by country name.
      *
-     * @return
+     * @return a sorted map of the country locales.
      */
     public static TreeMap getLocales() {
         Locale[] locales = Locale.getAvailableLocales();
