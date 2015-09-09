@@ -38,24 +38,10 @@ public class Utility {
      * @param context
      * @return
      */
-    public static boolean getDrawerNotificationSettings(Context context) {
+    public static boolean getPlayerNotificationSettings(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String key = context.getString(R.string.preference_enable_drawer_notifications_key);
-        boolean defaultValue = Boolean.parseBoolean(context.getString(R.string.preference_enable_drawer_notifications_default));
-
-        return preferences.getBoolean(key, defaultValue);
-    }
-
-    /**
-     * Gets the preference settings for the lock screen notifications.
-     *
-     * @param context
-     * @return
-     */
-    public static boolean getLockScreenNotificationSettings(Context context) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String key = context.getString(R.string.preference_enable_drawer_notifications_key);
-        boolean defaultValue = Boolean.parseBoolean(context.getString(R.string.preference_enable_drawer_notifications_default));
+        String key = context.getString(R.string.preference_enable_player_notifications_key);
+        boolean defaultValue = Boolean.parseBoolean(context.getString(R.string.preference_enable_player_notifications_default));
 
         return preferences.getBoolean(key, defaultValue);
     }

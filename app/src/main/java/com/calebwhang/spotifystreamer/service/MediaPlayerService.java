@@ -467,40 +467,36 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
         Log.v(LOG_TAG, "===== showNotification()");
 
         // Set visibility according to the user preference.
-        int visibility = Notification.VISIBILITY_PUBLIC;
-        if (Utility.getLockScreenNotificationSettings(getApplicationContext()) == false) {
-            visibility = Notification.VISIBILITY_SECRET;
-        }
-
-        // Set the notification click behavior.
-        Intent mediaPlayerIntent = new Intent(this, MediaPlayerActivity.class);
-        mediaPlayerIntent.putExtra(INTENT_EXTRA_IS_MODAL, false);
+        if (Utility.getPlayerNotificationSettings(getApplicationContext()) == true) {
+            // Set the notification click behavior.
+            Intent mediaPlayerIntent = new Intent(this, MediaPlayerActivity.class);
+            mediaPlayerIntent.putExtra(INTENT_EXTRA_IS_MODAL, false);
 
 //        Intent mediaPlayerIntent = new Intent(this, SearchArtistActivity.class);
 //        mediaPlayerIntent.setAction(Intent.ACTION_MAIN);
 //        mediaPlayerIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 //        mediaPlayerIntent.putExtra(INTENT_EXTRA_NOTIFICATION_CLICK, true);
 
-        PendingIntent playerPendingIntent = PendingIntent.getActivity(this, 0, mediaPlayerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent playerPendingIntent = PendingIntent.getActivity(this, 0, mediaPlayerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        // Build the notification.
-        mNotification = new NotificationCompat.Builder(getApplicationContext())
-                .setVisibility(visibility)
-                .setContentTitle(mCurrentTrack.artist)
-                .setContentText(mCurrentTrack.name)
-                .setSmallIcon(android.R.drawable.ic_media_play)
-                .setContentIntent(playerPendingIntent)
-                .build();
+            // Build the notification.
+            mNotification = new NotificationCompat.Builder(getApplicationContext())
+                    .setContentTitle(mCurrentTrack.artist)
+                    .setContentText(mCurrentTrack.name)
+                    .setSmallIcon(android.R.drawable.ic_media_play)
+                    .setContentIntent(playerPendingIntent)
+                    .build();
 
-        mNotificationContentView = getRemoteView(NOTIFICATION_NOW_PLAYING_VIEW_TYPE_COLLAPSED, mNotification);
-        mNotification.contentView = mNotificationContentView;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            mNotificationBigContentView = getRemoteView(NOTIFICATION_NOW_PLAYING_VIEW_TYPE_EXPANDED, mNotification);
-            mNotification.bigContentView = mNotificationBigContentView;
+            mNotificationContentView = getRemoteView(NOTIFICATION_NOW_PLAYING_VIEW_TYPE_COLLAPSED, mNotification);
+            mNotification.contentView = mNotificationContentView;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                mNotificationBigContentView = getRemoteView(NOTIFICATION_NOW_PLAYING_VIEW_TYPE_EXPANDED, mNotification);
+                mNotification.bigContentView = mNotificationBigContentView;
+            }
+
+            mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager.notify(NOTIFICATION_CURRENT_TRACK_ID, mNotification);
         }
-
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.notify(NOTIFICATION_CURRENT_TRACK_ID, mNotification);
     }
 
     /**

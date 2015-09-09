@@ -24,15 +24,10 @@
     <string name="preference_country_code_key">country_code</string>
     <string name="preference_country_code_default">US</string>
 
-    <string name="preference_enable_drawer_notifications_label">Drawer Notifications</string>
-    <string name="preference_enable_drawer_notifications_key">enable_drawer_notifications</string>
-    <string name="preference_enable_drawer_notifications_true">Enabled</string>
-    <string name="preference_enable_drawer_notifications_false">Not Enabled</string>
-    <string name="preference_enable_drawer_notifications_default">true</string>
+    <string name="preference_enable_player_notifications_label">Player Notifications</string>
+    <string name="preference_enable_player_notifications_key">enable_player_notifications</string>
+    <string name="preference_enable_player_notifications_true">Enabled</string>
+    <string name="preference_enable_player_notifications_false">Not Enabled</string>
+    <string name="preference_enable_player_notifications_default">true</string>
 
-    <string name="preference_enable_lock_screen_notifications_label">Lock Screen Notifications</string>
-    <string name="preference_enable_lock_screen_notifications_key">enable_lock_screen_notifications</string>
-    <string name="preference_enable_lock_screen_notifications_true">Enabled</string>
-    <string name="preference_enable_lock_screen_notifications_false">Not Enabled</string>
-    <string name="preference_enable_lock_screen_notifications_default">true</string>
 </resources>
