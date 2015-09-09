@@ -57,7 +57,8 @@
                     android:layout_height="30dp"
                     android:background="@null"
                     android:src="@android:drawable/ic_menu_share"
-                    android:visibility="gone"/>
+                    android:contentDescription="@string/accessibility_track_share"
+                    android:visibility="gone" />
 
             </LinearLayout>
 

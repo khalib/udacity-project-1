@@ -69,6 +69,9 @@ public class SearchArtistAdapter extends ArrayAdapter<ArtistParcelable> {
             mViewHolder.artistImage.setImageResource(R.mipmap.ic_launcher);
         }
 
+        // Set image descriptions on for accessibility.
+        mViewHolder.artistImage.setContentDescription(artist.name);
+
         return convertView;
     }
 }

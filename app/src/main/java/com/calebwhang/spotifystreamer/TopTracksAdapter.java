@@ -68,6 +68,13 @@ public class TopTracksAdapter extends ArrayAdapter<TrackParcelable> {
             mViewHolder.trackImage.setImageResource(R.mipmap.ic_launcher);
         }
 
+        // Set image descriptions on for accessibility.
+        String accessibilityText = String.format(getContext().getString(R.string.format_track_share_notification),
+                track.name,
+                track.artist,
+                track.album);
+        mViewHolder.trackImage.setContentDescription(accessibilityText);
+
         return convertView;
     }
 

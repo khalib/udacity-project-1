@@ -12,6 +12,12 @@
         Check out this song \"<xliff:g id="songName">%1$s</xliff:g>\" by <xliff:g id="artist">%2$s</xliff:g>: <xliff:g id="artist">%3$s</xliff:g>
     </string>
 
+    <string name="accessibility_track_info">
+        \"<xliff:g id="songName">%1$s</xliff:g>\" by <xliff:g id="artistName">%2$s</xliff:g> from the album \"<xliff:g id="albumName">%3$s</xliff:g>\"
+    </string>
+
+    <string name="accessibility_track_share">Share this song</string>
+
     <!-- Toast messages -->
     <string name="toast_error_no_artist_found">Sorry, no artist found.  Please refine your search.</string>
     <string name="toast_error_no_artist_top_songs">This artist has no top songs - how sad :(</string>
