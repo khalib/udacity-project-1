@@ -30,12 +30,14 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+
 /**
  * Service class that handles media audio tracks being played.  It also display player controls
  * along with meta data of the audio track that is being played.
  */
 public class MediaPlayerService extends Service implements MediaPlayer.OnPreparedListener,
-        MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
+        MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener,
+        MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnInfoListener {
 
     private static final String LOG_TAG = MediaPlayerService.class.getSimpleName();
 
@@ -72,9 +74,23 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     private OnTrackPauseListener mOnTrackPauseListener;
     private OnTrackCompletionListener mOnTrackCompletionListener;
     private OnTrackPreparedListener mOnTrackPreparedListener;
+    private OnTrackPreloadListener mOnTrackPreloadListener;
+    private OnTrackBufferingUpdateListener mOnTrackBufferingUpdateListener;
+    private OnTrackErrorListener mOnTrackErrorListener;
+    private OnTrackInfoListener mOnTrackInfoListener;
 
     public MediaPlayerService() {
 
+    }
+
+    @Override
+    public boolean onInfo(MediaPlayer mp, int what, int extra) {
+        // Invoke interface callback.
+        if (mOnTrackInfoListener != null) {
+            mOnTrackInfoListener.onTrackInfo(what, extra);
+        }
+
+        return false;
     }
 
     /**
@@ -123,6 +139,115 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
         void onTrackPrepared();
     }
 
+    /**
+     * Interface definition for a callback to be invoked when the selected media source is loading.
+     */
+    public interface OnTrackPreloadListener {
+        void onTrackPreload();
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when the selected media source is loading.
+     */
+    public interface OnTrackBufferingUpdateListener {
+        void onTrackBufferingUpdate(int percent);
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when the selected media source is loading.
+     */
+    public interface OnTrackErrorListener {
+        void onTrackError(int what, int extra);
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when the selected media source is loading.
+     */
+    public interface OnTrackInfoListener {
+        void onTrackInfo(int what, int extra);
+    }
+
+    /**
+     * Register a callback to be invoked when the media track has changed.
+     *
+     * @param listener the callback that will be run.
+     */
+    public void setOnTrackChangeListener(OnTrackChangeListener listener) {
+        mOnTrackChangeListener = listener;
+    }
+
+    /**
+     * Register a callback to be invoked when the media track has been played.
+     *
+     * @param listener the callback that will be run.
+     */
+    public void setOnTrackPlayListener(OnTrackPlayListener listener) {
+        mOnTrackPlayListener = listener;
+    }
+
+    /**
+     * Register a callback to be invoked when the media track has been paused.
+     *
+     * @param listener the callback that will be run.
+     */
+    public void setOnTrackPauseListener(OnTrackPauseListener listener) {
+        mOnTrackPauseListener = listener;
+    }
+
+    /**
+     * Register a callback to be invoked when the media track has finished playing.
+     *
+     * @param listener the callback that will be run.
+     */
+    public void setOnTrackCompletionListener(OnTrackCompletionListener listener) {
+        mOnTrackCompletionListener = listener;
+    }
+
+    /**
+     * Register a callback to be invoked when the media track has finished loading.
+     *
+     * @param listener the callback that will be run.
+     */
+    public void setOnTrackPreparedListener(OnTrackPreparedListener listener) {
+        mOnTrackPreparedListener = listener;
+    }
+
+    /**
+     * Register a callback to be invoked when the media track is about to be loaded.
+     *
+     * @param listener the callback that will be run.
+     */
+    public void setOnTrackPreloadListener(OnTrackPreloadListener listener) {
+        mOnTrackPreloadListener = listener;
+    }
+
+    /**
+     * Register a callback to be invoked when the media track is buffering.
+     *
+     * @param listener the callback that will be run.
+     */
+    public void setOnTrackBufferingUpdateListener(OnTrackBufferingUpdateListener listener) {
+        mOnTrackBufferingUpdateListener = listener;
+    }
+
+    /**
+     * Register a callback to be invoked when the media player encounters an error.
+     *
+     * @param listener the callback that will be run.
+     */
+    public void setOnTrackErrorListener(OnTrackErrorListener listener) {
+        mOnTrackErrorListener = listener;
+    }
+
+    /**
+     * Register a callback to be invoked when the media player has some info and/or warning.
+     *
+     * @param listener the callback that will be run.
+     */
+    public void setOnTrackInfoListener(OnTrackInfoListener listener) {
+        mOnTrackInfoListener = listener;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -136,6 +261,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
             mMediaPlayer.setOnPreparedListener(this);
             mMediaPlayer.setOnCompletionListener(this);
             mMediaPlayer.setOnErrorListener(this);
+            mMediaPlayer.setOnBufferingUpdateListener(this);
+            mMediaPlayer.setOnInfoListener(this);
 
             mCurrentTrackPosition = 0;
         }
@@ -167,12 +294,28 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     }
 
     @Override
+    public void onBufferingUpdate(MediaPlayer mp, int percent) {
+        // Invoke interface callback.
+        if (mOnTrackBufferingUpdateListener != null) {
+            mOnTrackBufferingUpdateListener.onTrackBufferingUpdate(percent);
+        }
+    }
+
+    @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        mp.release();
+
+        // Invoke interface callback.
+        if (mOnTrackErrorListener != null) {
+            mOnTrackErrorListener.onTrackError(what, extra);
+        }
+
         return false;
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        // Media is loaded and ready to go.
         mp.start();
         showNotification();
 
@@ -198,7 +341,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
             } else if(intent.getAction().equalsIgnoreCase(ACTION_NOTIFICATION_NEXT_TRACK)) {
                 // Next track actions.
                 playNextTrack();
-
             } else if(intent.getAction().equalsIgnoreCase(ACTION_NOTIFICATION_PREVIOUS_TRACK)) {
                 // Previous track actions.
                 playPreviousTrack();
@@ -270,14 +412,18 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
         mMediaPlayer.reset();
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
+        // Invoke callback.
+        if (mOnTrackPreloadListener != null) {
+            mOnTrackPreloadListener.onTrackPreload();
+        }
+
         try {
             // Load the track.
             mMediaPlayer.setDataSource(mCurrentTrack.previewUrl);
+            mMediaPlayer.prepareAsync();
         } catch (Exception e) {
             Toast.makeText(this, R.string.toast_error_media_player_data_load, Toast.LENGTH_LONG).show();
         }
-
-        mMediaPlayer.prepareAsync();
     }
 
     /**
@@ -310,7 +456,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     }
 
     /**
-     * Plays the previous track in the track list if one exitst.
+     * Plays the previous track in the track list if one exists.
      */
     public void playNextTrack() {
         if (hasNextTrack()) {
@@ -544,51 +690,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
             remoteViews.setInt(R.id.notification_next_imagebutton, "setVisibility", View.GONE);
             remoteViews.setInt(R.id.notification_next_imagebutton_disabled, "setVisibility", View.VISIBLE);
         }
-    }
-
-    /**
-     * Register a callback to be invoked when the media track has changed.
-     *
-     * @param listener the callback that will be run.
-     */
-    public void setOnTrackChangeListener(OnTrackChangeListener listener) {
-        mOnTrackChangeListener = listener;
-    }
-
-    /**
-     * Register a callback to be invoked when the media track has been played.
-     *
-     * @param listener the callback that will be run.
-     */
-    public void setOnTrackPlayListener(OnTrackPlayListener listener) {
-        mOnTrackPlayListener = listener;
-    }
-
-    /**
-     * Register a callback to be invoked when the media track has been paused.
-     *
-     * @param listener the callback that will be run.
-     */
-    public void setOnTrackPauseListener(OnTrackPauseListener listener) {
-        mOnTrackPauseListener = listener;
-    }
-
-    /**
-     * Register a callback to be invoked when the media track has finished playing.
-     *
-     * @param listener the callback that will be run.
-     */
-    public void setOnTrackCompletionListener(OnTrackCompletionListener listener) {
-        mOnTrackCompletionListener = listener;
-    }
-
-    /**
-     * Register a callback to be invoked when the media track has finished loading.
-     *
-     * @param listener the callback that will be run.
-     */
-    public void setOnTrackPreparedListener(OnTrackPreparedListener listener) {
-        mOnTrackPreparedListener = listener;
     }
 
 }

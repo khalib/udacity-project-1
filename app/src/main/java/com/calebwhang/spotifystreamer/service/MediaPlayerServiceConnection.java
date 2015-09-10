@@ -32,7 +32,7 @@ public class MediaPlayerServiceConnection implements ServiceConnection {
 
         // Invoke callback.
         if (mListener != null) {
-            mListener.onServiceConnected(mMediaPlayerService);
+            mListener.onMediaPlayerServiceConnected(mMediaPlayerService);
         }
     }
 

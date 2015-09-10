@@ -153,7 +153,7 @@ public class TopTracksFragment extends Fragment implements SpotifyArtistTopTrack
     }
 
     @Override
-    public void onServiceConnected(MediaPlayerService mediaPlayerService) {
+    public void onMediaPlayerServiceConnected(MediaPlayerService mediaPlayerService) {
         mMediaPlayerService = mediaPlayerService;
     }
 

@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Bundle;
@@ -25,6 +24,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.calebwhang.spotifystreamer.service.MediaPlayerService;
 import com.calebwhang.spotifystreamer.service.MediaPlayerServiceConnection;
@@ -42,10 +42,10 @@ import java.util.Date;
  * displays the meta data of the track being played.
  */
 public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSeekBarChangeListener,
-        MediaPlayer.OnCompletionListener, MediaPlayerServiceListenerInterface,
-        MediaPlayerService.OnTrackChangeListener, MediaPlayerService.OnTrackPlayListener,
-        MediaPlayerService.OnTrackPauseListener, MediaPlayerService.OnTrackCompletionListener,
-        MediaPlayerService.OnTrackPreparedListener {
+        MediaPlayerServiceListenerInterface, MediaPlayerService.OnTrackChangeListener,
+        MediaPlayerService.OnTrackPlayListener, MediaPlayerService.OnTrackPauseListener,
+        MediaPlayerService.OnTrackCompletionListener, MediaPlayerService.OnTrackPreparedListener,
+        MediaPlayerService.OnTrackErrorListener {
 
     private final String LOG_TAG = MediaPlayerFragment.class.getSimpleName();
 
@@ -74,6 +74,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     private Handler mHandler = new Handler();
     private ShareActionProvider mShareActionProvider;
     private boolean mIsModal = true;
+    private boolean mIsPrepared = false;
     private ProgressDialog mProgressDialog;
 
     public MediaPlayerFragment() {
@@ -164,8 +165,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
             }
         });
 
-        mProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.progress_dialog_loading));
-
         return rootView;
     }
 
@@ -233,11 +232,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         updateSeekBar(true);
     }
 
-    @Override
-    public void onCompletion(MediaPlayer mp) {
-        renderControlButtons();
-    }
-
     /**
      * Creates the share intent for sharing the current track being played.
      *
@@ -294,7 +288,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     private Runnable mUpdateSeekBarTask = new Runnable() {
         @Override
         public void run() {
-            if (mMediaPlayerService != null) {
+            if (mMediaPlayerService != null && mIsPrepared == true) {
                 int currentPosition = mMediaPlayerService.getCurrentPlaybackPosition();
                 int progress = getProgressPercentage(currentPosition, mCurrentTrack.previewDuration);
 
@@ -466,7 +460,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     }
 
     @Override
-    public void onServiceConnected(MediaPlayerService mediaPlayerService) {
+    public void onMediaPlayerServiceConnected(MediaPlayerService mediaPlayerService) {
         mMediaPlayerService = mediaPlayerService;
 
         // Set as listener for the callback interfaces.
@@ -475,6 +469,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
         mMediaPlayerService.setOnTrackPauseListener(this);
         mMediaPlayerService.setOnTrackCompletionListener(this);
         mMediaPlayerService.setOnTrackPreparedListener(this);
+        mMediaPlayerService.setOnTrackErrorListener(this);
 
         // Get track info/state.
         mCurrentTrack = mMediaPlayerService.getCurrentTrack();
@@ -489,7 +484,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     @Override
     public void onTrackChange() {
         loadTrackInfo();
-        mProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.progress_dialog_loading));
     }
 
     @Override
@@ -509,7 +503,17 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
     @Override
     public void onTrackPrepared() {
+        mIsPrepared = true;
         renderControlButtons();
-        mProgressDialog.dismiss();
     }
+
+    @Override
+    public void onTrackError(int what, int extra) {
+        Toast.makeText(getActivity(), R.string.toast_error_no_internet, Toast.LENGTH_LONG).show();
+
+        if (mProgressDialog != null) {
+            mProgressDialog.dismiss();
+        }
+    }
+
 }

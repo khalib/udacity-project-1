@@ -2,7 +2,10 @@ package com.calebwhang.spotifystreamer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -83,6 +86,31 @@ public class Utility {
         }
 
         return countries;
+    }
+
+    /**
+     * Checks to see if the device has a connection source.
+     *
+     * @return whether or not the device is connected.
+     */
+    public static boolean hasConnectivity() {
+        Context context = SpotifyStreamerApplication.getStaticApplicationContext();
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+
+        if (info != null) {
+            int netType = info.getType();
+            int netSubtype = info.getSubtype();
+
+            if (netType == ConnectivityManager.TYPE_WIFI) {
+                return info.isConnected();
+            } else if (netType == ConnectivityManager.TYPE_MOBILE && netSubtype == TelephonyManager.NETWORK_TYPE_UMTS) {
+                return info.isConnected();
+            }
+        }
+
+        return false;
     }
 
 }

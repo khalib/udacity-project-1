@@ -10,5 +10,5 @@ public interface MediaPlayerServiceListenerInterface
      *
      * @param mediaPlayerService
      */
-    void onServiceConnected(MediaPlayerService mediaPlayerService);
+    void onMediaPlayerServiceConnected(MediaPlayerService mediaPlayerService);
 }

@@ -5,6 +5,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.calebwhang.spotifystreamer.service.MediaPlayerService;
+
 import java.util.ArrayList;
 
 
@@ -56,6 +58,11 @@ public class SearchArtistActivity extends SpotifyStreamerActivity implements
     public void onTrackSelected(ArrayList<TrackParcelable> tracks, int position) {
         // Play and display the track info and player controls.
         mMediaPlayerService.playAndDisplayTrack(tracks, position, getSupportFragmentManager(), mIsLargeLayout);
+    }
+
+    @Override
+    public void onMediaPlayerServiceConnected(MediaPlayerService mediaPlayerService) {
+        mMediaPlayerService = mediaPlayerService;
     }
 
 }

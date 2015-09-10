@@ -103,8 +103,6 @@ public class SearchArtistFragment extends Fragment implements SpotifyArtistSearc
             public boolean onQueryTextChange(String s) {
                 // Assign the search string and perform the search.
                 if (!mSearchText.equals(s.toString())) {
-                    mProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.progress_dialog_searching));
-
                     mSearchText = s.toString();
                     getArtistSearchResults();
                 }
@@ -158,6 +156,8 @@ public class SearchArtistFragment extends Fragment implements SpotifyArtistSearc
      * Fetches artist search results from the Spotify API.
      */
     private void getArtistSearchResults() {
+        mProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.progress_dialog_searching));
+
         SpotifyArtistSearchTask spotifyArtistSearchTask = new SpotifyArtistSearchTask(getActivity(), mSearchArtistAdapter);
 
         // Set as task listener.

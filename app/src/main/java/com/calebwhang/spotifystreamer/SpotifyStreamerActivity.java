@@ -13,6 +13,7 @@ import com.calebwhang.spotifystreamer.service.MediaPlayerServiceConnection;
 import com.calebwhang.spotifystreamer.service.MediaPlayerServiceListenerInterface;
 import com.calebwhang.spotifystreamer.service.MediaPlayerServiceManager;
 
+
 /**
  * Base {@link android.app.Activity} for the Spotify Streamer application.
  */
@@ -86,7 +87,7 @@ public class SpotifyStreamerActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onServiceConnected(MediaPlayerService mediaPlayerService) {
+    public void onMediaPlayerServiceConnected(MediaPlayerService mediaPlayerService) {
         mMediaPlayerService = mediaPlayerService;
     }
 }
