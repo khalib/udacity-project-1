@@ -503,6 +503,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     @Override
     public void onTrackPrepared() {
         renderControlButtons();
+        runSeekBarUpdateTask();
     }
 
     @Override
