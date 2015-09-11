@@ -74,7 +74,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     private Handler mHandler = new Handler();
     private ShareActionProvider mShareActionProvider;
     private boolean mIsModal = true;
-    private boolean mIsPrepared = false;
     private ProgressDialog mProgressDialog;
 
     public MediaPlayerFragment() {
@@ -288,7 +287,7 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
     private Runnable mUpdateSeekBarTask = new Runnable() {
         @Override
         public void run() {
-            if (mMediaPlayerService != null && mIsPrepared == true) {
+            if (mMediaPlayerService != null && mMediaPlayerService.isTrackPrepared()) {
                 int currentPosition = mMediaPlayerService.getCurrentPlaybackPosition();
                 int progress = getProgressPercentage(currentPosition, mCurrentTrack.previewDuration);
 
@@ -503,7 +502,6 @@ public class MediaPlayerFragment extends DialogFragment implements SeekBar.OnSee
 
     @Override
     public void onTrackPrepared() {
-        mIsPrepared = true;
         renderControlButtons();
     }
 

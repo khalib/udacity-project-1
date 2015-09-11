@@ -61,6 +61,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     private ArrayList<TrackParcelable> mTracks;
     private TrackParcelable mCurrentTrack;
     private int mCurrentTrackPosition = 0;
+    private boolean mIsPrepared = false;
 
     private NotificationCompat.Builder mNotificationBuilder;
     private NotificationManager mNotificationManager;
@@ -316,6 +317,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     @Override
     public void onPrepared(MediaPlayer mp) {
         // Media is loaded and ready to go.
+        mIsPrepared = true;
         mp.start();
         showNotification();
 
@@ -690,6 +692,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
             remoteViews.setInt(R.id.notification_next_imagebutton, "setVisibility", View.GONE);
             remoteViews.setInt(R.id.notification_next_imagebutton_disabled, "setVisibility", View.VISIBLE);
         }
+    }
+
+    /**
+     * Checks to see if the media source has been loaded.
+     *
+     * @return whether or not the media file is loaded.
+     */
+    public boolean isTrackPrepared() {
+        return mIsPrepared;
     }
 
 }
