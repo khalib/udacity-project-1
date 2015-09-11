@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class SearchArtistFragment extends Fragment implements SpotifyArtistSearc
     private ListView mListView;
     private SearchArtistAdapter mSearchArtistAdapter;
     private ArrayList<ArtistParcelable> mArtistSearchResults;
-    private ProgressDialog mProgressDialog;
+    private ProgressBar mProgressBar;
 
     public SearchArtistFragment() {}
 
@@ -87,6 +88,9 @@ public class SearchArtistFragment extends Fragment implements SpotifyArtistSearc
                 }
             }
         });
+
+        // Get the progress bar.
+        mProgressBar = (ProgressBar) mRootView.findViewById(R.id.search_progress_bar);
 
         // Initialize search view.
         SearchView searchText = (SearchView) mRootView.findViewById(R.id.search_text);
@@ -149,14 +153,14 @@ public class SearchArtistFragment extends Fragment implements SpotifyArtistSearc
             }
         }
 
-        mProgressDialog.dismiss();
+        mProgressBar.setVisibility(View.GONE);
     }
 
     /**
      * Fetches artist search results from the Spotify API.
      */
     private void getArtistSearchResults() {
-        mProgressDialog = ProgressDialog.show(getActivity(), null, getString(R.string.progress_dialog_searching));
+        mProgressBar.setVisibility(View.VISIBLE);
 
         SpotifyArtistSearchTask spotifyArtistSearchTask = new SpotifyArtistSearchTask(getActivity(), mSearchArtistAdapter);
 
